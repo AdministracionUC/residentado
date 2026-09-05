@@ -76,7 +76,7 @@
   }
   header.topbar button.logout:hover { background: rgba(255,255,255,0.14); }
 
-  main { max-width: 1180px; margin: 0 auto; padding: 24px 18px 70px; }
+  main { max-width: 1300px; margin: 0 auto; padding: 24px 18px 70px; }
 
   /* ---------- Login ---------- */
   .login-wrap {
@@ -190,8 +190,8 @@
   /* ---------- Layout matrícula (tabla + panel) ---------- */
   .layout-matricula {
     display: grid;
-    grid-template-columns: 1.5fr 1fr;
-    gap: 20px;
+    grid-template-columns: minmax(0, 1fr) 300px;
+    gap: 18px;
     align-items: start;
   }
   @media (max-width: 860px) {
@@ -230,7 +230,7 @@
   /* ---------- Tabla horario (solo lectura) ---------- */
   .tabla-wrap { overflow-x: auto; background: var(--superficie); border: 1px solid var(--borde); border-radius: var(--radio); padding: 6px; }
   table.horario { border-collapse: collapse; width: 100%; font-size: 12px; }
-  table.horario th, table.horario td { border: 1px solid var(--borde); padding: 7px 8px; text-align: center; white-space: nowrap; }
+  table.horario th, table.horario td { border: 1px solid var(--borde); padding: 6px 6px; text-align: center; white-space: nowrap; }
   table.horario th { background: var(--gris-claro); color: var(--azul-oscuro); font-weight: 700; position: sticky; top: 0; z-index: 3; }
   table.horario th.mes-col { position: sticky; left: 0; background: var(--gris-claro); text-align: left; z-index: 4; }
   table.horario td.mes-col { position: sticky; left: 0; background: var(--superficie); text-align: left; font-weight: 600; z-index: 1; }
