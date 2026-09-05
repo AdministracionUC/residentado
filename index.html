@@ -4,49 +4,79 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Residentado EsSalud Cusco</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
-    --azul: #0b5ea8;
-    --azul-oscuro: #06407a;
-    --verde: #1c8a5b;
-    --rojo: #c0392b;
-    --gris: #6b7280;
-    --gris-claro: #eef1f4;
-    --fondo: #f4f6f8;
-    --texto: #1f2937;
-    --borde: #d7dde3;
+    --azul: #004C73;
+    --azul-medio: #0077A8;
+    --azul-oscuro: #00344F;
+    --naranja: #F2994A;
+    --naranja-oscuro: #D9791F;
+    --verde: #2F9E68;
+    --verde-fondo: #E7F5EE;
+    --rojo: #D64545;
+    --rojo-fondo: #FBEAEA;
+    --gris: #5B6B76;
+    --gris-claro: #EEF3F5;
+    --fondo: #F3F6F8;
+    --superficie: #FFFFFF;
+    --texto: #1E2A32;
+    --borde: #DCE6EA;
+    --radio: 10px;
   }
   * { box-sizing: border-box; }
-  body {
+  html, body {
     margin: 0;
-    font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-family: 'Public Sans', -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     background: var(--fondo);
     color: var(--texto);
+    -webkit-font-smoothing: antialiased;
   }
+  h1, h2, h3, h4 { font-weight: 700; letter-spacing: -0.01em; }
+  a { color: var(--azul-medio); }
+  :focus-visible { outline: 3px solid var(--naranja); outline-offset: 2px; }
+
+  /* ---------- Barra superior ---------- */
   header.topbar {
-    background: linear-gradient(135deg, var(--azul), var(--azul-oscuro));
+    background: var(--azul);
+    background-image: linear-gradient(180deg, var(--azul) 0%, var(--azul-oscuro) 100%);
     color: white;
-    padding: 16px 24px;
+    padding: 14px 24px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: 10px;
+    border-bottom: 4px solid var(--naranja);
   }
-  header.topbar h1 { font-size: 18px; margin: 0; }
-  header.topbar .user-info { font-size: 13px; opacity: 0.9; }
+  header.topbar .marca { display: flex; align-items: baseline; gap: 10px; }
+  header.topbar .marca .es { font-weight: 800; font-size: 19px; }
+  header.topbar .marca .es span { color: var(--naranja); }
+  header.topbar .marca small { opacity: 0.85; font-weight: 400; font-size: 12.5px; }
+  header.topbar .user-info { font-size: 13px; opacity: 0.95; display: flex; align-items: center; gap: 10px; }
+  header.topbar .user-info .rol-chip {
+    background: rgba(255,255,255,0.16);
+    border: 1px solid rgba(255,255,255,0.3);
+    padding: 3px 10px;
+    border-radius: 100px;
+    font-size: 12px;
+    text-transform: capitalize;
+  }
   header.topbar button.logout {
-    background: rgba(255,255,255,0.15);
-    border: 1px solid rgba(255,255,255,0.4);
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.45);
     color: white;
-    padding: 6px 12px;
-    border-radius: 6px;
+    padding: 7px 14px;
+    border-radius: 7px;
     cursor: pointer;
     font-size: 13px;
+    font-family: inherit;
   }
-  header.topbar button.logout:hover { background: rgba(255,255,255,0.28); }
+  header.topbar button.logout:hover { background: rgba(255,255,255,0.14); }
 
-  main { max-width: 1100px; margin: 0 auto; padding: 20px 16px 60px; }
+  main { max-width: 1180px; margin: 0 auto; padding: 24px 18px 70px; }
 
   /* ---------- Login ---------- */
   .login-wrap {
@@ -55,129 +85,189 @@
     align-items: center;
     justify-content: center;
     padding: 20px;
+    background: radial-gradient(1200px 600px at 15% 10%, #E8F1F6 0%, var(--fondo) 55%);
   }
   .login-card {
-    background: white;
-    border-radius: 14px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-    padding: 32px 28px;
+    background: var(--superficie);
+    border-radius: var(--radio);
+    box-shadow: 0 18px 46px rgba(0, 51, 79, 0.14);
     width: 100%;
-    max-width: 380px;
+    max-width: 400px;
+    overflow: hidden;
+    border-top: 5px solid var(--naranja);
   }
-  .login-card h2 { margin-top: 0; color: var(--azul-oscuro); font-size: 20px; }
-  .login-card p.subtitle { color: var(--gris); font-size: 13px; margin-top: -8px; }
-  label { display: block; font-size: 13px; font-weight: 600; margin: 14px 0 6px; }
+  .login-card .login-inner { padding: 34px 30px 28px; }
+  .login-card .login-eyebrow { font-size: 12.5px; color: var(--azul-medio); font-weight: 600; margin: 0 0 4px; }
+  .login-card h2 { margin: 0 0 6px; color: var(--azul-oscuro); font-size: 21px; }
+  .login-card p.subtitle { color: var(--gris); font-size: 13.5px; margin: 0 0 4px; line-height: 1.5; }
+  label { display: block; font-size: 13px; font-weight: 600; margin: 16px 0 6px; color: var(--azul-oscuro); }
   input, select, textarea {
     width: 100%;
-    padding: 10px 12px;
-    border: 1px solid var(--borde);
+    padding: 11px 12px;
+    border: 1.5px solid var(--borde);
     border-radius: 8px;
-    font-size: 14px;
+    font-size: 14.5px;
     background: white;
+    font-family: inherit;
+    color: var(--texto);
   }
+  input:focus, select:focus, textarea:focus { border-color: var(--azul-medio); }
+  select:disabled, input:disabled { background: var(--gris-claro); color: var(--gris); }
   button.primary {
-    margin-top: 18px;
+    margin-top: 20px;
     width: 100%;
-    background: var(--azul);
+    background: var(--naranja);
     color: white;
     border: none;
-    padding: 11px;
+    padding: 12px;
     border-radius: 8px;
-    font-size: 14px;
-    font-weight: 600;
+    font-size: 14.5px;
+    font-weight: 700;
     cursor: pointer;
+    font-family: inherit;
+    transition: background .12s;
   }
-  button.primary:hover { background: var(--azul-oscuro); }
+  button.primary:hover { background: var(--naranja-oscuro); }
+  button.primary:disabled { background: #c9c9c9; cursor: default; }
   button.secondary {
     background: white;
     color: var(--azul);
-    border: 1px solid var(--azul);
-    padding: 8px 14px;
+    border: 1.5px solid var(--azul);
+    padding: 9px 14px;
     border-radius: 8px;
-    font-size: 13px;
+    font-size: 13.5px;
     cursor: pointer;
+    font-family: inherit;
+    font-weight: 600;
   }
+  button.secondary:hover { background: var(--gris-claro); }
   .error-msg {
-    background: #fdecea;
+    background: var(--rojo-fondo);
     color: var(--rojo);
-    padding: 10px 12px;
+    padding: 11px 13px;
     border-radius: 8px;
-    font-size: 13px;
+    font-size: 13.5px;
     margin-top: 12px;
+    border: 1px solid rgba(214,69,69,0.25);
   }
   .success-msg {
-    background: #e8f6ee;
+    background: var(--verde-fondo);
     color: var(--verde);
-    padding: 10px 12px;
+    padding: 11px 13px;
     border-radius: 8px;
-    font-size: 13px;
+    font-size: 13.5px;
     margin-top: 12px;
+    border: 1px solid rgba(47,158,104,0.25);
   }
 
   /* ---------- Menú principal ---------- */
-  .menu-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 16px;
-    margin-top: 20px;
-  }
-  .menu-card {
-    background: white;
-    border-radius: 12px;
-    padding: 22px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-    cursor: pointer;
+  .pagina-titulo { color: var(--azul-oscuro); margin: 4px 0 22px; font-size: 22px; }
+  .menu-lista { display: flex; flex-direction: column; gap: 10px; margin-top: 18px; }
+  .menu-item {
+    background: var(--superficie);
     border: 1px solid var(--borde);
-    transition: transform .12s, box-shadow .12s;
+    border-left: 4px solid var(--azul-medio);
+    border-radius: 8px;
+    padding: 18px 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    transition: border-color .12s, background .12s;
   }
-  .menu-card:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.09); }
-  .menu-card h3 { margin: 0 0 6px; color: var(--azul-oscuro); font-size: 16px; }
-  .menu-card p { margin: 0; font-size: 13px; color: var(--gris); }
+  .menu-item:hover { background: #FAFCFD; border-left-color: var(--naranja); }
+  .menu-item .texto h3 { margin: 0 0 3px; color: var(--azul-oscuro); font-size: 15.5px; }
+  .menu-item .texto p { margin: 0; font-size: 13px; color: var(--gris); }
+  .menu-item .flecha { color: var(--gris); font-size: 18px; }
 
-  .back-link { display: inline-block; margin-bottom: 14px; color: var(--azul); cursor: pointer; font-size: 13px; }
+  .back-link { display: inline-flex; align-items: center; gap: 6px; margin-bottom: 16px; color: var(--azul-medio); cursor: pointer; font-size: 13.5px; font-weight: 600; }
+  .back-link:hover { color: var(--azul); }
 
-  h2.section-title { color: var(--azul-oscuro); margin-bottom: 4px; }
-  p.section-sub { color: var(--gris); margin-top: 0; font-size: 13px; }
+  h2.section-title { color: var(--azul-oscuro); margin: 0 0 4px; font-size: 20px; }
+  p.section-sub { color: var(--gris); margin: 0 0 20px; font-size: 13.5px; }
 
-  /* ---------- Tabla horario ---------- */
-  .tabla-wrap { overflow-x: auto; background: white; border-radius: 10px; padding: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-  table.horario { border-collapse: collapse; width: 100%; font-size: 12.5px; }
-  table.horario th, table.horario td { border: 1px solid var(--borde); padding: 6px 8px; text-align: center; white-space: nowrap; }
-  table.horario th { background: var(--gris-claro); position: sticky; top: 0; }
-  table.horario th.mes-col { position: sticky; left: 0; background: var(--gris-claro); text-align: left; z-index: 2; }
-  table.horario td.mes-col { position: sticky; left: 0; background: white; text-align: left; font-weight: 600; z-index: 1; }
-  .celda { padding: 6px 8px; border-radius: 6px; cursor: pointer; font-size: 12px; }
-  .celda.disponible { background: #eaf3fb; color: var(--azul-oscuro); }
-  .celda.disponible:hover { background: #d6e9f8; }
-  .celda.mia { background: var(--verde); color: white; font-weight: 700; cursor: default; }
-  .celda.lleno { background: #f3f4f6; color: var(--gris); text-decoration: line-through; cursor: not-allowed; }
-  .celda.usada { background: #fbeaea; color: var(--rojo); text-decoration: line-through; cursor: not-allowed; }
-  .celda.bloqueada-mes { background: #f3f4f6; color: var(--gris); cursor: not-allowed; }
-  .leyenda { display: flex; gap: 16px; flex-wrap: wrap; margin: 12px 0; font-size: 12px; color: var(--gris); }
+  /* ---------- Layout matrícula (tabla + panel) ---------- */
+  .layout-matricula {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+    gap: 20px;
+    align-items: start;
+  }
+  @media (max-width: 860px) {
+    .layout-matricula { grid-template-columns: 1fr; }
+    .panel-matricula { order: -1; }
+  }
+
+  .panel-matricula {
+    background: var(--superficie);
+    border-radius: var(--radio);
+    border: 1px solid var(--borde);
+    padding: 20px;
+    position: sticky;
+    top: 18px;
+  }
+  .panel-matricula h3 { margin: 0 0 4px; color: var(--azul-oscuro); font-size: 16px; }
+  .panel-matricula .panel-sub { margin: 0 0 6px; font-size: 12.5px; color: var(--gris); line-height: 1.5; }
+  .progreso-wrap { margin: 14px 0 6px; }
+  .progreso-barra { height: 8px; background: var(--gris-claro); border-radius: 100px; overflow: hidden; }
+  .progreso-relleno { height: 100%; background: var(--naranja); border-radius: 100px; transition: width .25s; }
+  .progreso-texto { font-size: 12px; color: var(--gris); margin-top: 6px; }
+
+  .panel-completo {
+    text-align: center;
+    padding: 18px 6px 4px;
+  }
+  .panel-completo .check-circulo {
+    width: 52px; height: 52px; border-radius: 50%;
+    background: var(--verde-fondo); color: var(--verde);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 26px; margin: 0 auto 14px;
+  }
+  .panel-completo h3 { color: var(--azul-oscuro); margin: 0 0 8px; }
+  .panel-completo p { color: var(--gris); font-size: 13.5px; line-height: 1.6; margin: 0; }
+
+  /* ---------- Tabla horario (solo lectura) ---------- */
+  .tabla-wrap { overflow-x: auto; background: var(--superficie); border: 1px solid var(--borde); border-radius: var(--radio); padding: 6px; }
+  table.horario { border-collapse: collapse; width: 100%; font-size: 12px; }
+  table.horario th, table.horario td { border: 1px solid var(--borde); padding: 7px 8px; text-align: center; white-space: nowrap; }
+  table.horario th { background: var(--gris-claro); color: var(--azul-oscuro); font-weight: 700; position: sticky; top: 0; z-index: 3; }
+  table.horario th.mes-col { position: sticky; left: 0; background: var(--gris-claro); text-align: left; z-index: 4; }
+  table.horario td.mes-col { position: sticky; left: 0; background: var(--superficie); text-align: left; font-weight: 600; z-index: 1; }
+  .celda { padding: 6px 8px; border-radius: 6px; font-size: 11.5px; }
+  .celda.disponible { background: #F0F5F8; color: var(--gris); }
+  .celda.mia { background: var(--verde); color: white; font-weight: 700; }
+  .celda.lleno { background: #F3F4F6; color: #97A2AA; text-decoration: line-through; }
+  .celda.usada { background: var(--rojo-fondo); color: var(--rojo); text-decoration: line-through; }
+  .celda.bloqueada-mes { background: #F3F4F6; color: #97A2AA; }
+  .leyenda { display: flex; gap: 16px; flex-wrap: wrap; margin: 0 0 12px; font-size: 12px; color: var(--gris); }
   .leyenda span.box { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 5px; vertical-align: middle; }
 
   /* ---------- Vista por especialidad ---------- */
-  .mes-bloque { background: white; border-radius: 10px; padding: 16px; margin-bottom: 14px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-  .mes-bloque h3 { margin-top: 0; color: var(--azul-oscuro); }
-  .esp-fila { border-top: 1px solid var(--borde); padding: 10px 0; }
+  .mes-bloque { background: var(--superficie); border: 1px solid var(--borde); border-radius: var(--radio); padding: 18px 20px; margin-bottom: 14px; }
+  .mes-bloque h3 { margin-top: 0; color: var(--azul-oscuro); font-size: 15.5px; }
+  .esp-fila { border-top: 1px solid var(--borde); padding: 11px 0; }
   .esp-fila:first-child { border-top: none; }
-  .esp-fila .esp-nombre { font-weight: 600; }
+  .esp-fila .esp-nombre { font-weight: 600; color: var(--texto); }
   .esp-fila .esp-doctor { color: var(--gris); font-size: 12.5px; }
-  .esp-fila .estudiantes { margin-top: 4px; font-size: 13px; }
-  .chip { display: inline-block; background: var(--gris-claro); padding: 3px 9px; border-radius: 20px; margin: 2px 4px 0 0; font-size: 12.5px; }
+  .esp-fila .estudiantes { margin-top: 5px; font-size: 13px; }
+  .chip { display: inline-block; background: var(--gris-claro); color: var(--azul-oscuro); padding: 3px 10px; border-radius: 100px; margin: 2px 4px 0 0; font-size: 12px; font-weight: 600; }
 
   /* ---------- Documentos ---------- */
-  .filtros { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
-  .filtros select, .filtros input { width: auto; min-width: 140px; }
+  .filtros { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 18px; }
+  .filtros select, .filtros input { width: auto; min-width: 160px; }
   .doc-list { display: grid; gap: 10px; }
-  .doc-card { background: white; border-radius: 10px; padding: 14px 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
-  .doc-card .titulo { font-weight: 600; }
+  .doc-card { background: var(--superficie); border: 1px solid var(--borde); border-radius: var(--radio); padding: 14px 18px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+  .doc-card .titulo { font-weight: 600; color: var(--texto); }
   .doc-card .meta { font-size: 12.5px; color: var(--gris); }
-  .doc-card a.link-btn { background: var(--azul); color: white; padding: 7px 14px; border-radius: 6px; text-decoration: none; font-size: 13px; }
+  .doc-card a.link-btn { background: var(--azul); color: white; padding: 8px 16px; border-radius: 7px; text-decoration: none; font-size: 13px; font-weight: 600; }
+  .doc-card a.link-btn:hover { background: var(--azul-oscuro); }
 
-  .form-box { background: white; border-radius: 10px; padding: 18px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 22px; max-width: 480px; }
-  .loading { text-align: center; color: var(--gris); padding: 30px; }
+  .form-box { background: var(--superficie); border: 1px solid var(--borde); border-radius: var(--radio); padding: 20px; margin-bottom: 24px; max-width: 480px; }
+  .form-box h3 { margin-top: 0; color: var(--azul-oscuro); }
+  .loading { text-align: center; color: var(--gris); padding: 34px 10px; font-size: 13.5px; }
   .hidden { display: none !important; }
+  .empty-state { text-align: center; color: var(--gris); padding: 30px; background: var(--superficie); border: 1px dashed var(--borde); border-radius: var(--radio); font-size: 13.5px; }
 </style>
 </head>
 <body>
@@ -194,8 +284,7 @@ var CONFIG = {
 
 var state = {
   usuario: JSON.parse(localStorage.getItem('residentado_usuario') || 'null'),
-  vista: 'menu',
-  cargando: false
+  vista: 'menu'
 };
 
 var app = document.getElementById('app');
@@ -225,7 +314,7 @@ function render() {
   if (!state.usuario) { renderLogin(); return; }
   var v = state.vista;
   if (v === 'menu') renderMenu();
-  else if (v === 'registrar-residentado') renderHorario();
+  else if (v === 'registrar-residentado') renderMatricula();
   else if (v === 'residentes-por-especialidad') renderResidentesPorEspecialidad();
   else if (v === 'documentos') renderDocumentos();
   else renderMenu();
@@ -233,12 +322,14 @@ function render() {
 
 function shell(contentHtml) {
   var rol = state.usuario ? state.usuario.rol : '';
+  var rolLabel = rol === 'area_archivos' ? 'Área de archivos' : (rol === 'estudiante' ? 'Residente' : rol);
   app.innerHTML =
     '<header class="topbar">' +
-      '<h1>Residentado EsSalud Cusco</h1>' +
+      '<div class="marca"><span class="es">Es<span>Salud</span> Cusco</span><small>Residentado médico</small></div>' +
       (state.usuario ? (
-        '<div class="user-info">' + escapeHtml(state.usuario.nombre) + ' · ' + escapeHtml(rol) +
-        ' <button class="logout" onclick="logout()">Salir</button></div>'
+        '<div class="user-info">' + escapeHtml(state.usuario.nombre) +
+        '<span class="rol-chip">' + escapeHtml(rolLabel) + '</span>' +
+        '<button class="logout" onclick="logout()">Salir</button></div>'
       ) : '') +
     '</header>' +
     '<main>' + contentHtml + '</main>';
@@ -255,16 +346,17 @@ function escapeHtml(s) {
 // ==================================================================
 function renderLogin() {
   app.innerHTML =
-    '<div class="login-wrap"><div class="login-card">' +
-      '<h2>Residentado EsSalud Cusco</h2>' +
-      '<p class="subtitle">Ingresa con tu DNI y la contraseña entregada en la oficina.</p>' +
+    '<div class="login-wrap"><div class="login-card"><div class="login-inner">' +
+      '<p class="login-eyebrow">EsSalud Cusco</p>' +
+      '<h2>Residentado médico</h2>' +
+      '<p class="subtitle">Ingresa con tu DNI y la contraseña entregada en la oficina de la sede.</p>' +
       '<div id="login-error"></div>' +
       '<label>DNI</label>' +
       '<input id="in-dni" inputmode="numeric" maxlength="15" placeholder="Ej. 70123456" />' +
       '<label>Contraseña</label>' +
       '<input id="in-pass" type="password" placeholder="Contraseña" />' +
       '<button class="primary" id="btn-login">Ingresar</button>' +
-    '</div></div>';
+    '</div></div></div>';
 
   document.getElementById('btn-login').onclick = function () {
     var dni = document.getElementById('in-dni').value.trim();
@@ -298,28 +390,32 @@ function renderLogin() {
 // ==================================================================
 function renderMenu() {
   var rol = state.usuario.rol;
-  var tarjetas = '';
+  var items = [];
 
   if (rol === 'estudiante') {
-    tarjetas += menuCard('registrar-residentado', 'Registrar residentado', 'Elige tu especialidad para cada mes del año.');
+    items.push({ vista: 'registrar-residentado', titulo: 'Registrar residentado', desc: 'Elige tu especialidad para cada mes del año, uno a la vez.' });
   }
   if (rol === 'area_archivos') {
-    tarjetas += menuCard('documentos', 'Registrar archivos', 'Sube documentos PDF del residentado.');
+    items.push({ vista: 'documentos', titulo: 'Registrar archivos', desc: 'Sube documentos PDF del residentado.' });
   }
-  tarjetas += menuCard('residentes-por-especialidad', 'Residentes asignados por especialidad', 'Consulta qué residentes tiene cada doctor por mes.');
+  items.push({ vista: 'residentes-por-especialidad', titulo: 'Residentes asignados por especialidad', desc: 'Consulta qué residentes tiene cada doctor por mes.' });
   if (rol === 'estudiante') {
-    tarjetas += menuCard('documentos', 'Documentos', 'Revisa los documentos publicados.');
+    items.push({ vista: 'documentos', titulo: 'Documentos', desc: 'Revisa los documentos publicados por el área correspondiente.' });
   }
 
-  shell('<div class="menu-grid">' + tarjetas + '</div>');
+  var html = '<h2 class="pagina-titulo">¿Qué deseas hacer hoy?</h2><div class="menu-lista">';
+  items.forEach(function (it) {
+    html += '<div class="menu-item" data-vista="' + it.vista + '">' +
+      '<div class="texto"><h3>' + it.titulo + '</h3><p>' + it.desc + '</p></div>' +
+      '<div class="flecha">&rsaquo;</div></div>';
+  });
+  html += '</div>';
 
-  document.querySelectorAll('.menu-card').forEach(function (el) {
+  shell(html);
+
+  document.querySelectorAll('.menu-item').forEach(function (el) {
     el.onclick = function () { setVista(el.getAttribute('data-vista')); };
   });
-}
-
-function menuCard(vista, titulo, desc) {
-  return '<div class="menu-card" data-vista="' + vista + '"><h3>' + titulo + '</h3><p>' + desc + '</p></div>';
 }
 
 function backLink() {
@@ -327,75 +423,164 @@ function backLink() {
 }
 
 // ==================================================================
-// REGISTRAR RESIDENTADO (horario de matrícula)
+// REGISTRAR RESIDENTADO — tabla informativa + panel de matrícula
 // ==================================================================
-function renderHorario() {
+var horarioData = null; // cache de la última respuesta de getHorario
+
+function renderMatricula() {
   shell(backLink() + '<h2 class="section-title">Registrar residentado</h2>' +
-        '<p class="section-sub">Residentado ' + escapeHtml(state.usuario.residentado) + ' — elige una especialidad distinta para cada mes.</p>' +
-        '<div id="horario-contenido" class="loading">Cargando horario…</div>');
+        '<p class="section-sub">Residentado ' + escapeHtml(state.usuario.residentado) + ' — usa el formulario de matrícula para registrar un mes a la vez. La tabla de la izquierda es solo referencial.</p>' +
+        '<div id="matricula-contenido" class="loading">Cargando tu horario…</div>');
 
+  cargarHorario();
+}
+
+function cargarHorario() {
   apiGet('getHorario', { residentado: state.usuario.residentado, dni: state.usuario.dni }).then(function (res) {
-    var cont = document.getElementById('horario-contenido');
+    var cont = document.getElementById('matricula-contenido');
     if (!res.ok) { cont.innerHTML = '<div class="error-msg">' + escapeHtml(res.error || 'Error al cargar el horario.') + '</div>'; return; }
-
-    var meses = res.meses, especialidades = res.especialidades, matriz = res.matriz;
-
-    var html = '<div id="horario-msg"></div>';
-    html += '<div class="leyenda">' +
-      '<span><span class="box" style="background:#eaf3fb"></span>Disponible</span>' +
-      '<span><span class="box" style="background:#1c8a5b"></span>Tu elección</span>' +
-      '<span><span class="box" style="background:#fbeaea"></span>Ya la usaste</span>' +
-      '<span><span class="box" style="background:#f3f4f6"></span>Sin cupo / mes ocupado</span>' +
+    horarioData = res;
+    cont.innerHTML = '<div class="layout-matricula">' +
+      '<div>' + construirTablaHorarioHtml(res) + '</div>' +
+      '<div id="panel-matricula">' + construirPanelMatriculaHtml(res) + '</div>' +
       '</div>';
-    html += '<div class="tabla-wrap"><table class="horario"><thead><tr><th class="mes-col">Mes</th>';
-    especialidades.forEach(function (e) {
-      html += '<th>' + escapeHtml(e.nombre) + (e.turno && e.turno !== 'único' ? '<br><small>(' + escapeHtml(e.turno) + ')</small>' : '') + '<br><small style="font-weight:400">' + escapeHtml(e.doctor) + '</small></th>';
-    });
-    html += '</tr></thead><tbody>';
-
-    meses.forEach(function (mes) {
-      html += '<tr><td class="mes-col">' + escapeHtml(mes.label) + '</td>';
-      especialidades.forEach(function (esp) {
-        var celda = matriz[mes.key][esp.codigo + '|' + esp.turno];
-        var claseCelda, texto, clickable = false;
-        if (celda.esLaMia) { claseCelda = 'mia'; texto = '✓ Elegida'; }
-        else if (celda.yaUsadaPorMi) { claseCelda = 'usada'; texto = 'Ya usada'; }
-        else if (celda.bloqueadaPorOtroMes) { claseCelda = 'bloqueada-mes'; texto = '—'; }
-        else if (celda.lleno) { claseCelda = 'lleno'; texto = 'Sin cupo'; }
-        else { claseCelda = 'disponible'; texto = celda.ocupados + '/' + celda.cupoMaximo; clickable = true; }
-
-        html += '<td><div class="celda ' + claseCelda + '"' +
-          (clickable ? ' onclick="elegirEspecialidad(\'' + mes.key + '\',\'' + esp.codigo + '\',\'' + esp.turno + '\',\'' + escapeHtml(esp.nombre).replace(/'/g, "\\'") + '\',\'' + escapeHtml(mes.label).replace(/'/g, "\\'") + '\')"' : '') +
-          '>' + texto + '</div></td>';
-      });
-      html += '</tr>';
-    });
-    html += '</tbody></table></div>';
-    cont.innerHTML = html;
+    activarPanelMatricula(res);
   }).catch(function (err) {
-    document.getElementById('horario-contenido').innerHTML = '<div class="error-msg">Error de conexión: ' + escapeHtml(err.message || err) + '</div>';
+    document.getElementById('matricula-contenido').innerHTML = '<div class="error-msg">Error de conexión: ' + escapeHtml(err.message || err) + '</div>';
   });
 }
 
-function elegirEspecialidad(mesKey, codigo, turno, nombreEsp, mesLabel) {
-  if (!confirm('¿Confirmas "' + nombreEsp + '" para ' + mesLabel + '?')) return;
-  apiPost('registrarAsignacion', {
-    residentado: state.usuario.residentado,
-    dni: state.usuario.dni,
-    mes: mesKey,
-    especialidadCodigo: codigo,
-    turno: turno
-  }).then(function (res) {
-    var msgBox = document.getElementById('horario-msg');
-    if (res.ok) {
-      msgBox.innerHTML = '<div class="success-msg">' + escapeHtml(res.mensaje) + '</div>';
-      renderHorario();
-    } else {
-      msgBox.innerHTML = '<div class="error-msg">' + escapeHtml(res.error) + '</div>';
-    }
-  }).catch(function (err) {
-    document.getElementById('horario-msg').innerHTML = '<div class="error-msg">Error de conexión: ' + escapeHtml(err.message || err) + '</div>';
+function construirTablaHorarioHtml(res) {
+  var meses = res.meses, especialidades = res.especialidades, matriz = res.matriz;
+
+  var html = '<div class="leyenda">' +
+    '<span><span class="box" style="background:#F0F5F8"></span>Disponible</span>' +
+    '<span><span class="box" style="background:#2F9E68"></span>Tu elección</span>' +
+    '<span><span class="box" style="background:#FBEAEA"></span>Ya la usaste</span>' +
+    '<span><span class="box" style="background:#F3F4F6"></span>Sin cupo / mes ocupado</span>' +
+    '</div>';
+  html += '<div class="tabla-wrap"><table class="horario"><thead><tr><th class="mes-col">Mes</th>';
+  especialidades.forEach(function (e) {
+    html += '<th>' + escapeHtml(e.nombre) + (e.turno && e.turno !== 'único' ? '<br><small>(' + escapeHtml(e.turno) + ')</small>' : '') + '<br><small style="font-weight:400">' + escapeHtml(e.doctor) + '</small></th>';
   });
+  html += '</tr></thead><tbody>';
+
+  meses.forEach(function (mes) {
+    html += '<tr><td class="mes-col">' + escapeHtml(mes.label) + '</td>';
+    especialidades.forEach(function (esp) {
+      var celda = matriz[mes.key][esp.codigo + '|' + esp.turno];
+      var claseCelda, texto;
+      if (celda.esLaMia) { claseCelda = 'mia'; texto = '✓'; }
+      else if (celda.yaUsadaPorMi) { claseCelda = 'usada'; texto = '—'; }
+      else if (celda.bloqueadaPorOtroMes) { claseCelda = 'bloqueada-mes'; texto = '—'; }
+      else if (celda.lleno) { claseCelda = 'lleno'; texto = 'Sin cupo'; }
+      else { claseCelda = 'disponible'; texto = celda.ocupados + '/' + celda.cupoMaximo; }
+      html += '<td><div class="celda ' + claseCelda + '">' + texto + '</div></td>';
+    });
+    html += '</tr>';
+  });
+  html += '</tbody></table></div>';
+  return html;
+}
+
+function construirPanelMatriculaHtml(res) {
+  var meses = res.meses;
+  var totalMeses = meses.length;
+  var registrados = Object.keys(res.misAsignaciones || {}).length;
+
+  if (registrados >= totalMeses) {
+    return '<div class="panel-completo">' +
+      '<div class="check-circulo">&#10003;</div>' +
+      '<h3>Registro completo</h3>' +
+      '<p>Gracias — ya registraste tus ' + totalMeses + ' meses de residentado. Esta información ha quedado guardada y no podrá ser modificada. Cualquier corrección debe solicitarse directamente en la oficina.</p>' +
+      '</div>';
+  }
+
+  var pct = Math.round((registrados / totalMeses) * 100);
+  return '<h3>Matrícula</h3>' +
+    '<p class="panel-sub">Elige un mes disponible y luego la especialidad que quieres cursar en ese mes.</p>' +
+    '<div class="progreso-wrap">' +
+      '<div class="progreso-barra"><div class="progreso-relleno" style="width:' + pct + '%"></div></div>' +
+      '<div class="progreso-texto">' + registrados + ' de ' + totalMeses + ' meses registrados</div>' +
+    '</div>' +
+    '<div id="matricula-msg"></div>' +
+    '<label>Mes</label>' +
+    '<select id="sel-mes"></select>' +
+    '<label>Especialidad</label>' +
+    '<select id="sel-especialidad"></select>' +
+    '<button class="primary" id="btn-matricular">Registrar mes</button>';
+}
+
+function activarPanelMatricula(res) {
+  var selMes = document.getElementById('sel-mes');
+  if (!selMes) return; // ya está en estado "completo", no hay formulario
+
+  var meses = res.meses, especialidades = res.especialidades, matriz = res.matriz;
+  var misAsignaciones = res.misAsignaciones || {};
+
+  var mesesDisponibles = meses.filter(function (m) { return !misAsignaciones[m.key]; });
+  selMes.innerHTML = mesesDisponibles.map(function (m) {
+    return '<option value="' + m.key + '">' + escapeHtml(m.label) + '</option>';
+  }).join('');
+
+  function pintarEspecialidades() {
+    var mesKey = selMes.value;
+    var selEsp = document.getElementById('sel-especialidad');
+    var opciones = especialidades.map(function (esp) {
+      var celda = matriz[mesKey] ? matriz[mesKey][esp.codigo + '|' + esp.turno] : null;
+      if (!celda) return null;
+      if (celda.yaUsadaPorMi || celda.lleno) return null; // ya no se puede elegir: bloqueado
+      var etiquetaTurno = esp.turno && esp.turno !== 'único' ? ' (' + esp.turno + ')' : '';
+      var cupoTexto = ' — ' + celda.ocupados + '/' + celda.cupoMaximo + ' cupos';
+      return '<option value="' + esp.codigo + '|' + esp.turno + '">' + escapeHtml(esp.nombre + etiquetaTurno + cupoTexto) + '</option>';
+    }).filter(Boolean);
+    selEsp.innerHTML = opciones.length ? opciones.join('') : '<option value="">No hay especialidades disponibles para este mes</option>';
+  }
+
+  selMes.onchange = pintarEspecialidades;
+  if (mesesDisponibles.length) pintarEspecialidades();
+  else {
+    document.getElementById('sel-especialidad').innerHTML = '<option value="">—</option>';
+  }
+
+  document.getElementById('btn-matricular').onclick = function () {
+    var msgBox = document.getElementById('matricula-msg');
+    msgBox.innerHTML = '';
+    var mesKey = selMes.value;
+    var espVal = document.getElementById('sel-especialidad').value;
+    if (!mesKey || !espVal) {
+      msgBox.innerHTML = '<div class="error-msg">Elige un mes y una especialidad para continuar.</div>';
+      return;
+    }
+    var partes = espVal.split('|');
+    var codigo = partes[0], turno = partes[1];
+    var esp = especialidades.filter(function (e) { return e.codigo === codigo && e.turno === turno; })[0];
+    var mesInfo = meses.filter(function (m) { return m.key === mesKey; })[0];
+
+    if (!confirm('¿Confirmas "' + (esp ? esp.nombre : codigo) + '" para ' + (mesInfo ? mesInfo.label : mesKey) + '?\n\nUna vez enviado, este registro no podrá modificarse.')) return;
+
+    var btn = document.getElementById('btn-matricular');
+    btn.disabled = true; btn.textContent = 'Registrando...';
+    apiPost('registrarAsignacion', {
+      residentado: state.usuario.residentado,
+      dni: state.usuario.dni,
+      mes: mesKey,
+      especialidadCodigo: codigo,
+      turno: turno
+    }).then(function (r) {
+      btn.disabled = false; btn.textContent = 'Registrar mes';
+      if (r.ok) {
+        msgBox.innerHTML = '<div class="success-msg">' + escapeHtml(r.mensaje) + '</div>';
+        cargarHorario();
+      } else {
+        msgBox.innerHTML = '<div class="error-msg">' + escapeHtml(r.error) + '</div>';
+        cargarHorario(); // por si el cupo cambió mientras decidía, refresca la vista
+      }
+    }).catch(function (err) {
+      btn.disabled = false; btn.textContent = 'Registrar mes';
+      msgBox.innerHTML = '<div class="error-msg">Error de conexión: ' + escapeHtml(err.message || err) + '</div>';
+    });
+  };
 }
 
 // ==================================================================
@@ -417,7 +602,7 @@ function renderResidentesPorEspecialidad() {
     apiGet('getResidentesPorEspecialidad', { residentado: residentado }).then(function (res) {
       var cont = document.getElementById('rpe-contenido');
       if (!res.ok) { cont.innerHTML = '<div class="error-msg">' + escapeHtml(res.error || 'Error al cargar.') + '</div>'; return; }
-      if (!res.meses.length) { cont.innerHTML = '<p>Aún no hay residentes asignados en meses vigentes.</p>'; return; }
+      if (!res.meses.length) { cont.innerHTML = '<div class="empty-state">Aún no hay residentes asignados en meses vigentes.</div>'; return; }
 
       var html = '';
       res.meses.forEach(function (mes) {
@@ -439,10 +624,8 @@ function renderResidentesPorEspecialidad() {
 
   if (necesitaSelector) {
     document.getElementById('sel-residentado').onchange = function (e) { cargar(e.target.value); };
-    cargar(residentadoActual);
-  } else {
-    cargar(residentadoActual);
   }
+  cargar(residentadoActual);
 }
 
 // ==================================================================
@@ -456,7 +639,7 @@ function renderDocumentos() {
   if (esArea) {
     formHtml =
       '<div class="form-box">' +
-        '<h3 style="margin-top:0">Subir documento (PDF)</h3>' +
+        '<h3>Subir documento (PDF)</h3>' +
         '<div id="doc-form-msg"></div>' +
         '<label>Residentado</label>' +
         (residentadoFijo
@@ -497,7 +680,7 @@ function renderDocumentos() {
     apiGet('getDocumentos', params).then(function (res) {
       var cont = document.getElementById('doc-lista');
       if (!res.ok) { cont.innerHTML = '<div class="error-msg">' + escapeHtml(res.error || 'Error al cargar.') + '</div>'; return; }
-      if (!res.documentos.length) { cont.innerHTML = '<p>No hay documentos que coincidan.</p>'; return; }
+      if (!res.documentos.length) { cont.innerHTML = '<div class="empty-state">No hay documentos que coincidan con el filtro.</div>'; return; }
       cont.innerHTML = '<div class="doc-list">' + res.documentos.map(function (d) {
         return '<div class="doc-card"><div>' +
           '<div class="titulo">' + escapeHtml(d.titulo) + '</div>' +
