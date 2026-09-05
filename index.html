@@ -320,9 +320,13 @@ function render() {
   else renderMenu();
 }
 
+function rolNormalizado() {
+  return state.usuario ? String(state.usuario.rol || '').toLowerCase().trim() : '';
+}
+
 function shell(contentHtml) {
-  var rol = state.usuario ? state.usuario.rol : '';
-  var rolLabel = rol === 'area_archivos' ? 'Área de archivos' : (rol === 'estudiante' ? 'Residente' : rol);
+  var rol = rolNormalizado();
+  var rolLabel = rol === 'area_archivos' ? 'Área de archivos' : (rol === 'estudiante' ? 'Residente' : (state.usuario ? state.usuario.rol : ''));
   app.innerHTML =
     '<header class="topbar">' +
       '<div class="marca"><span class="es">Es<span>Salud</span> Cusco</span><small>Residentado médico</small></div>' +
@@ -389,7 +393,7 @@ function renderLogin() {
 // MENÚ PRINCIPAL
 // ==================================================================
 function renderMenu() {
-  var rol = state.usuario.rol;
+  var rol = rolNormalizado();
   var items = [];
 
   if (rol === 'estudiante') {
@@ -429,7 +433,7 @@ var horarioData = null; // cache de la última respuesta de getHorario
 
 function renderMatricula() {
   shell(backLink() + '<h2 class="section-title">Registrar residentado</h2>' +
-        '<p class="section-sub">Residentado ' + escapeHtml(state.usuario.residentado) + ' — usa el formulario de matrícula para registrar un mes a la vez. La tabla de la izquierda es solo referencial.</p>' +
+        '<p class="section-sub">Residentado ' + escapeHtml(state.usuario.residentado) + ' — la matrícula se habilita mes a mes: al cerrar un mes se abre automáticamente el siguiente. La tabla de la izquierda es solo referencial.</p>' +
         '<div id="matricula-contenido" class="loading">Cargando tu horario…</div>');
 
   cargarHorario();
@@ -483,10 +487,23 @@ function construirTablaHorarioHtml(res) {
   return html;
 }
 
+// El mes "activo" es el primer mes del año de residentado que aún no ha
+// terminado (fin >= ahora). En cuanto ese mes termina, deja de calificar
+// como activo y automáticamente pasa a ser el siguiente — sin que haya
+// que tocar código ni configuración.
+function obtenerMesActivo(meses) {
+  var ahora = Date.now();
+  for (var i = 0; i < meses.length; i++) {
+    if (meses[i].fin >= ahora) return meses[i];
+  }
+  return null; // el año de residentado ya terminó
+}
+
 function construirPanelMatriculaHtml(res) {
   var meses = res.meses;
   var totalMeses = meses.length;
-  var registrados = Object.keys(res.misAsignaciones || {}).length;
+  var misAsignaciones = res.misAsignaciones || {};
+  var registrados = Object.keys(misAsignaciones).length;
 
   if (registrados >= totalMeses) {
     return '<div class="panel-completo">' +
@@ -497,65 +514,62 @@ function construirPanelMatriculaHtml(res) {
   }
 
   var pct = Math.round((registrados / totalMeses) * 100);
-  return '<h3>Matrícula</h3>' +
-    '<p class="panel-sub">Elige un mes disponible y luego la especialidad que quieres cursar en ese mes.</p>' +
-    '<div class="progreso-wrap">' +
+  var progresoHtml = '<div class="progreso-wrap">' +
       '<div class="progreso-barra"><div class="progreso-relleno" style="width:' + pct + '%"></div></div>' +
       '<div class="progreso-texto">' + registrados + ' de ' + totalMeses + ' meses registrados</div>' +
-    '</div>' +
+    '</div>';
+
+  var mesActivo = obtenerMesActivo(meses);
+
+  if (!mesActivo) {
+    return '<h3>Matrícula</h3>' + progresoHtml +
+      '<p class="panel-sub">El año de residentado ya terminó. Si te falta algún mes por registrar, acércate a la oficina.</p>';
+  }
+
+  if (misAsignaciones[mesActivo.key]) {
+    return '<h3>Matrícula</h3>' + progresoHtml +
+      '<p class="panel-sub">Ya registraste tu especialidad de <strong>' + escapeHtml(mesActivo.label) + '</strong>. La matrícula del siguiente mes se habilitará automáticamente en cuanto termine este.</p>';
+  }
+
+  return '<h3>Matrícula</h3>' +
+    '<p class="panel-sub">Mes actual: <strong>' + escapeHtml(mesActivo.label) + '</strong>. Elige la especialidad que quieres cursar este mes.</p>' +
+    progresoHtml +
     '<div id="matricula-msg"></div>' +
-    '<label>Mes</label>' +
-    '<select id="sel-mes"></select>' +
+    '<input type="hidden" id="mes-activo-key" value="' + mesActivo.key + '" />' +
     '<label>Especialidad</label>' +
     '<select id="sel-especialidad"></select>' +
     '<button class="primary" id="btn-matricular">Registrar mes</button>';
 }
 
 function activarPanelMatricula(res) {
-  var selMes = document.getElementById('sel-mes');
-  if (!selMes) return; // ya está en estado "completo", no hay formulario
+  var selEsp = document.getElementById('sel-especialidad');
+  if (!selEsp) return; // no hay formulario activo (año completo, terminado, o ya registró este mes)
 
-  var meses = res.meses, especialidades = res.especialidades, matriz = res.matriz;
-  var misAsignaciones = res.misAsignaciones || {};
+  var especialidades = res.especialidades, matriz = res.matriz;
+  var mesKey = document.getElementById('mes-activo-key').value;
 
-  var mesesDisponibles = meses.filter(function (m) { return !misAsignaciones[m.key]; });
-  selMes.innerHTML = mesesDisponibles.map(function (m) {
-    return '<option value="' + m.key + '">' + escapeHtml(m.label) + '</option>';
-  }).join('');
-
-  function pintarEspecialidades() {
-    var mesKey = selMes.value;
-    var selEsp = document.getElementById('sel-especialidad');
-    var opciones = especialidades.map(function (esp) {
-      var celda = matriz[mesKey] ? matriz[mesKey][esp.codigo + '|' + esp.turno] : null;
-      if (!celda) return null;
-      if (celda.yaUsadaPorMi || celda.lleno) return null; // ya no se puede elegir: bloqueado
-      var etiquetaTurno = esp.turno && esp.turno !== 'único' ? ' (' + esp.turno + ')' : '';
-      var cupoTexto = ' — ' + celda.ocupados + '/' + celda.cupoMaximo + ' cupos';
-      return '<option value="' + esp.codigo + '|' + esp.turno + '">' + escapeHtml(esp.nombre + etiquetaTurno + cupoTexto) + '</option>';
-    }).filter(Boolean);
-    selEsp.innerHTML = opciones.length ? opciones.join('') : '<option value="">No hay especialidades disponibles para este mes</option>';
-  }
-
-  selMes.onchange = pintarEspecialidades;
-  if (mesesDisponibles.length) pintarEspecialidades();
-  else {
-    document.getElementById('sel-especialidad').innerHTML = '<option value="">—</option>';
-  }
+  var opciones = especialidades.map(function (esp) {
+    var celda = matriz[mesKey] ? matriz[mesKey][esp.codigo + '|' + esp.turno] : null;
+    if (!celda) return null;
+    if (celda.yaUsadaPorMi || celda.lleno) return null; // ya no se puede elegir: bloqueado
+    var etiquetaTurno = esp.turno && esp.turno !== 'único' ? ' (' + esp.turno + ')' : '';
+    var cupoTexto = ' — ' + celda.ocupados + '/' + celda.cupoMaximo + ' cupos';
+    return '<option value="' + esp.codigo + '|' + esp.turno + '">' + escapeHtml(esp.nombre + etiquetaTurno + cupoTexto) + '</option>';
+  }).filter(Boolean);
+  selEsp.innerHTML = opciones.length ? opciones.join('') : '<option value="">No hay especialidades disponibles este mes</option>';
 
   document.getElementById('btn-matricular').onclick = function () {
     var msgBox = document.getElementById('matricula-msg');
     msgBox.innerHTML = '';
-    var mesKey = selMes.value;
-    var espVal = document.getElementById('sel-especialidad').value;
-    if (!mesKey || !espVal) {
-      msgBox.innerHTML = '<div class="error-msg">Elige un mes y una especialidad para continuar.</div>';
+    var espVal = selEsp.value;
+    if (!espVal) {
+      msgBox.innerHTML = '<div class="error-msg">Elige una especialidad para continuar.</div>';
       return;
     }
     var partes = espVal.split('|');
     var codigo = partes[0], turno = partes[1];
     var esp = especialidades.filter(function (e) { return e.codigo === codigo && e.turno === turno; })[0];
-    var mesInfo = meses.filter(function (m) { return m.key === mesKey; })[0];
+    var mesInfo = res.meses.filter(function (m) { return m.key === mesKey; })[0];
 
     if (!confirm('¿Confirmas "' + (esp ? esp.nombre : codigo) + '" para ' + (mesInfo ? mesInfo.label : mesKey) + '?\n\nUna vez enviado, este registro no podrá modificarse.')) return;
 
@@ -632,7 +646,7 @@ function renderResidentesPorEspecialidad() {
 // DOCUMENTOS
 // ==================================================================
 function renderDocumentos() {
-  var esArea = state.usuario.rol === 'area_archivos';
+  var esArea = rolNormalizado() === 'area_archivos';
   var residentadoFijo = state.usuario.residentado;
 
   var formHtml = '';
