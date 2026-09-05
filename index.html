@@ -575,6 +575,7 @@ function activarPanelMatricula(res) {
 
     var btn = document.getElementById('btn-matricular');
     btn.disabled = true; btn.textContent = 'Registrando...';
+    selEsp.disabled = true; // evita que se alcance a cambiar/enviar de nuevo mientras responde el servidor
     apiPost('registrarAsignacion', {
       residentado: state.usuario.residentado,
       dni: state.usuario.dni,
@@ -582,16 +583,16 @@ function activarPanelMatricula(res) {
       especialidadCodigo: codigo,
       turno: turno
     }).then(function (r) {
-      btn.disabled = false; btn.textContent = 'Registrar mes';
+      btn.disabled = false; btn.textContent = 'Registrar mes'; selEsp.disabled = false;
       if (r.ok) {
         msgBox.innerHTML = '<div class="success-msg">' + escapeHtml(r.mensaje) + '</div>';
         cargarHorario();
       } else {
         msgBox.innerHTML = '<div class="error-msg">' + escapeHtml(r.error) + '</div>';
-        cargarHorario(); // por si el cupo cambió mientras decidía, refresca la vista
+        cargarHorario(); // por si el cupo o el mes cambiaron mientras decidía, refresca la vista
       }
     }).catch(function (err) {
-      btn.disabled = false; btn.textContent = 'Registrar mes';
+      btn.disabled = false; btn.textContent = 'Registrar mes'; selEsp.disabled = false;
       msgBox.innerHTML = '<div class="error-msg">Error de conexión: ' + escapeHtml(err.message || err) + '</div>';
     });
   };
