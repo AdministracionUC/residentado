@@ -604,41 +604,65 @@ function activarPanelMatricula(res) {
 function renderResidentesPorEspecialidad() {
   var rol = rolNormalizado();
   var esDoctor = rol === 'doctor';
-  var necesitaSelector = !state.usuario.residentado;
+  var necesitaSelector = !esDoctor && !state.usuario.residentado;
   var residentadoActual = state.usuario.residentado || '1';
 
   shell(backLink() + '<h2 class="section-title">Residentes asignados por especialidad</h2>' +
-        '<p class="section-sub">' + (esDoctor ? 'Residentes que tienes asignados a tu servicio, por mes.' : 'Vista por mes, especialidad y doctor a cargo.') + '</p>' +
+        '<p class="section-sub">' + (esDoctor ? 'Residentes que tienes asignados a tu servicio, en cada residentado, por mes.' : 'Vista por mes, especialidad y doctor a cargo.') + '</p>' +
         (necesitaSelector ?
           '<div class="filtros"><select id="sel-residentado"><option value="1">Residentado 1</option><option value="2">Residentado 2</option><option value="3">Residentado 3</option></select></div>'
           : '') +
         '<div id="rpe-contenido" class="loading">Cargando…</div>');
 
-  function cargar(residentado) {
-    document.getElementById('rpe-contenido').innerHTML = '<div class="loading">Cargando…</div>';
-    var params = { residentado: residentado };
-    if (esDoctor) params.doctor = state.usuario.nombre; // el doctor solo ve su propio servicio
-    apiGet('getResidentesPorEspecialidad', params).then(function (res) {
-      var cont = document.getElementById('rpe-contenido');
-      if (!res.ok) { cont.innerHTML = '<div class="error-msg">' + escapeHtml(res.error || 'Error al cargar.') + '</div>'; return; }
-      if (!res.meses.length) { cont.innerHTML = '<div class="empty-state">Aún no hay residentes asignados en meses vigentes.</div>'; return; }
-
-      var html = '';
-      res.meses.forEach(function (mes) {
-        html += '<div class="mes-bloque"><h3>' + escapeHtml(mes.mesLabel) + '</h3>';
-        mes.especialidades.forEach(function (esp) {
-          html += '<div class="esp-fila"><div class="esp-nombre">' + escapeHtml(esp.nombre) +
-            (esp.turno && esp.turno !== 'único' ? ' (' + escapeHtml(esp.turno) + ')' : '') + '</div>' +
-            '<div class="esp-doctor">Doctor a cargo: ' + escapeHtml(esp.doctor || '—') + '</div>' +
-            '<div class="estudiantes">' + esp.estudiantes.map(function (e) { return '<span class="chip">' + escapeHtml(e.nombre) + '</span>'; }).join('') + '</div>' +
-            '</div>';
-        });
-        html += '</div>';
+  function pintarBloqueMeses(res) {
+    if (!res.ok) return '<div class="error-msg">' + escapeHtml(res.error || 'Error al cargar.') + '</div>';
+    if (!res.meses.length) return '';
+    var html = '';
+    res.meses.forEach(function (mes) {
+      html += '<div class="mes-bloque"><h3>' + escapeHtml(mes.mesLabel) + '</h3>';
+      mes.especialidades.forEach(function (esp) {
+        html += '<div class="esp-fila"><div class="esp-nombre">' + escapeHtml(esp.nombre) +
+          (esp.turno && esp.turno !== 'único' ? ' (' + escapeHtml(esp.turno) + ')' : '') + '</div>' +
+          '<div class="esp-doctor">Doctor a cargo: ' + escapeHtml(esp.doctor || '—') + '</div>' +
+          '<div class="estudiantes">' + esp.estudiantes.map(function (e) { return '<span class="chip">' + escapeHtml(e.nombre) + '</span>'; }).join('') + '</div>' +
+          '</div>';
       });
-      cont.innerHTML = html;
+      html += '</div>';
+    });
+    return html;
+  }
+
+  function cargarDoctor() {
+    document.getElementById('rpe-contenido').innerHTML = '<div class="loading">Cargando…</div>';
+    Promise.all(['1', '2', '3'].map(function (residentado) {
+      return apiGet('getResidentesPorEspecialidad', { residentado: residentado, doctor: state.usuario.nombre });
+    })).then(function (resultados) {
+      var cont = document.getElementById('rpe-contenido');
+      var html = '';
+      resultados.forEach(function (res, i) {
+        var bloque = pintarBloqueMeses(res);
+        if (bloque) html += '<h2 class="pagina-titulo" style="font-size:16px;margin-top:22px">Residentado ' + (i + 1) + '</h2>' + bloque;
+      });
+      cont.innerHTML = html || '<div class="empty-state">Aún no tienes residentes asignados en meses vigentes, en ningún residentado.</div>';
     }).catch(function (err) {
       document.getElementById('rpe-contenido').innerHTML = '<div class="error-msg">Error de conexión: ' + escapeHtml(err.message || err) + '</div>';
     });
+  }
+
+  function cargar(residentado) {
+    document.getElementById('rpe-contenido').innerHTML = '<div class="loading">Cargando…</div>';
+    apiGet('getResidentesPorEspecialidad', { residentado: residentado }).then(function (res) {
+      var cont = document.getElementById('rpe-contenido');
+      var bloque = pintarBloqueMeses(res);
+      cont.innerHTML = bloque || (res.ok ? '<div class="empty-state">Aún no hay residentes asignados en meses vigentes.</div>' : bloque);
+    }).catch(function (err) {
+      document.getElementById('rpe-contenido').innerHTML = '<div class="error-msg">Error de conexión: ' + escapeHtml(err.message || err) + '</div>';
+    });
+  }
+
+  if (esDoctor) {
+    cargarDoctor();
+    return;
   }
 
   if (necesitaSelector) {
