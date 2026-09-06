@@ -12,8 +12,8 @@
     --azul: #004C73;
     --azul-medio: #0077A8;
     --azul-oscuro: #00344F;
-    --naranja: #F2994A;
-    --naranja-oscuro: #D9791F;
+    --celeste: #3FA9DC;
+    --celeste-oscuro: #1F8FC4;
     --verde: #2F9E68;
     --verde-fondo: #E7F5EE;
     --rojo: #D64545;
@@ -36,7 +36,7 @@
   }
   h1, h2, h3, h4 { font-weight: 700; letter-spacing: -0.01em; }
   a { color: var(--azul-medio); }
-  :focus-visible { outline: 3px solid var(--naranja); outline-offset: 2px; }
+  :focus-visible { outline: 3px solid var(--celeste); outline-offset: 2px; }
 
   /* ---------- Barra superior ---------- */
   header.topbar {
@@ -49,11 +49,11 @@
     align-items: center;
     flex-wrap: wrap;
     gap: 10px;
-    border-bottom: 4px solid var(--naranja);
+    border-bottom: 4px solid var(--celeste);
   }
   header.topbar .marca { display: flex; align-items: baseline; gap: 10px; }
   header.topbar .marca .es { font-weight: 800; font-size: 19px; }
-  header.topbar .marca .es span { color: var(--naranja); }
+  header.topbar .marca .es span { color: var(--celeste); }
   header.topbar .marca small { opacity: 0.85; font-weight: 400; font-size: 12.5px; }
   header.topbar .user-info { font-size: 13px; opacity: 0.95; display: flex; align-items: center; gap: 10px; }
   header.topbar .user-info .rol-chip {
@@ -94,7 +94,7 @@
     width: 100%;
     max-width: 400px;
     overflow: hidden;
-    border-top: 5px solid var(--naranja);
+    border-top: 5px solid var(--celeste);
   }
   .login-card .login-inner { padding: 34px 30px 28px; }
   .login-card .login-eyebrow { font-size: 12.5px; color: var(--azul-medio); font-weight: 600; margin: 0 0 4px; }
@@ -116,7 +116,7 @@
   button.primary {
     margin-top: 20px;
     width: 100%;
-    background: var(--naranja);
+    background: var(--celeste);
     color: white;
     border: none;
     padding: 12px;
@@ -127,7 +127,7 @@
     font-family: inherit;
     transition: background .12s;
   }
-  button.primary:hover { background: var(--naranja-oscuro); }
+  button.primary:hover { background: var(--celeste-oscuro); }
   button.primary:disabled { background: #c9c9c9; cursor: default; }
   button.secondary {
     background: white;
@@ -176,7 +176,7 @@
     gap: 14px;
     transition: border-color .12s, background .12s;
   }
-  .menu-item:hover { background: #FAFCFD; border-left-color: var(--naranja); }
+  .menu-item:hover { background: #FAFCFD; border-left-color: var(--celeste); }
   .menu-item .texto h3 { margin: 0 0 3px; color: var(--azul-oscuro); font-size: 15.5px; }
   .menu-item .texto p { margin: 0; font-size: 13px; color: var(--gris); }
   .menu-item .flecha { color: var(--gris); font-size: 18px; }
@@ -211,7 +211,7 @@
   .panel-matricula .panel-sub { margin: 0 0 6px; font-size: 12.5px; color: var(--gris); line-height: 1.5; }
   .progreso-wrap { margin: 14px 0 6px; }
   .progreso-barra { height: 8px; background: var(--gris-claro); border-radius: 100px; overflow: hidden; }
-  .progreso-relleno { height: 100%; background: var(--naranja); border-radius: 100px; transition: width .25s; }
+  .progreso-relleno { height: 100%; background: var(--celeste); border-radius: 100px; transition: width .25s; }
   .progreso-texto { font-size: 12px; color: var(--gris); margin-top: 6px; }
 
   .panel-completo {
@@ -326,7 +326,7 @@ function rolNormalizado() {
 
 function shell(contentHtml) {
   var rol = rolNormalizado();
-  var rolLabel = rol === 'area_archivos' ? 'Área de archivos' : (rol === 'estudiante' ? 'Residente' : (state.usuario ? state.usuario.rol : ''));
+  var rolLabel = rol === 'area_archivos' ? 'Área de archivos' : (rol === 'estudiante' ? 'Residente' : (rol === 'doctor' ? 'Doctor' : (state.usuario ? state.usuario.rol : '')));
   app.innerHTML =
     '<header class="topbar">' +
       '<div class="marca"><span class="es">Es<span>Salud</span> Cusco</span><small>Residentado médico</small></div>' +
@@ -402,8 +402,8 @@ function renderMenu() {
   if (rol === 'area_archivos') {
     items.push({ vista: 'documentos', titulo: 'Registrar archivos', desc: 'Sube documentos PDF del residentado.' });
   }
-  items.push({ vista: 'residentes-por-especialidad', titulo: 'Residentes asignados por especialidad', desc: 'Consulta qué residentes tiene cada doctor por mes.' });
-  if (rol === 'estudiante') {
+  items.push({ vista: 'residentes-por-especialidad', titulo: 'Residentes asignados por especialidad', desc: (rol === 'doctor' ? 'Consulta qué residentes tienes asignados a tu servicio, por mes.' : 'Consulta qué residentes tiene cada doctor por mes.') });
+  if (rol === 'estudiante' || rol === 'doctor') {
     items.push({ vista: 'documentos', titulo: 'Documentos', desc: 'Revisa los documentos publicados por el área correspondiente.' });
   }
 
@@ -487,16 +487,16 @@ function construirTablaHorarioHtml(res) {
   return html;
 }
 
-// El mes "activo" es el primer mes del año de residentado que aún no ha
-// terminado (fin >= ahora). En cuanto ese mes termina, deja de calificar
-// como activo y automáticamente pasa a ser el siguiente — sin que haya
-// que tocar código ni configuración.
-function obtenerMesActivo(meses) {
-  var ahora = Date.now();
+// El mes "activo" es el primer mes del año de residentado (en el orden
+// configurado, empezando en el mes de inicio) que el estudiante TODAVÍA
+// no ha registrado. En cuanto registra ese mes, deja de ser el activo y
+// automáticamente pasa a ser el siguiente — no depende de la fecha real
+// de la computadora, sino de que el estudiante ya haya terminado ese mes.
+function obtenerMesActivo(meses, misAsignaciones) {
   for (var i = 0; i < meses.length; i++) {
-    if (meses[i].fin >= ahora) return meses[i];
+    if (!misAsignaciones[meses[i].key]) return meses[i];
   }
-  return null; // el año de residentado ya terminó
+  return null; // ya registró los 12 meses
 }
 
 function construirPanelMatriculaHtml(res) {
@@ -519,16 +519,16 @@ function construirPanelMatriculaHtml(res) {
       '<div class="progreso-texto">' + registrados + ' de ' + totalMeses + ' meses registrados</div>' +
     '</div>';
 
-  var mesActivo = obtenerMesActivo(meses);
+  var mesActivo = obtenerMesActivo(meses, misAsignaciones);
 
   if (!mesActivo) {
     return '<h3>Matrícula</h3>' + progresoHtml +
-      '<p class="panel-sub">El año de residentado ya terminó. Si te falta algún mes por registrar, acércate a la oficina.</p>';
+      '<p class="panel-sub">No hay más meses configurados para matricular. Verifica la hoja Config si esto no es correcto.</p>';
   }
 
   if (misAsignaciones[mesActivo.key]) {
     return '<h3>Matrícula</h3>' + progresoHtml +
-      '<p class="panel-sub">Ya registraste tu especialidad de <strong>' + escapeHtml(mesActivo.label) + '</strong>. La matrícula del siguiente mes se habilitará automáticamente en cuanto termine este.</p>';
+      '<p class="panel-sub">Ya registraste tu especialidad de <strong>' + escapeHtml(mesActivo.label) + '</strong>.</p>';
   }
 
   return '<h3>Matrícula</h3>' +
@@ -602,11 +602,13 @@ function activarPanelMatricula(res) {
 // RESIDENTES ASIGNADOS POR ESPECIALIDAD
 // ==================================================================
 function renderResidentesPorEspecialidad() {
+  var rol = rolNormalizado();
+  var esDoctor = rol === 'doctor';
   var necesitaSelector = !state.usuario.residentado;
   var residentadoActual = state.usuario.residentado || '1';
 
   shell(backLink() + '<h2 class="section-title">Residentes asignados por especialidad</h2>' +
-        '<p class="section-sub">Vista por mes, especialidad y doctor a cargo.</p>' +
+        '<p class="section-sub">' + (esDoctor ? 'Residentes que tienes asignados a tu servicio, por mes.' : 'Vista por mes, especialidad y doctor a cargo.') + '</p>' +
         (necesitaSelector ?
           '<div class="filtros"><select id="sel-residentado"><option value="1">Residentado 1</option><option value="2">Residentado 2</option><option value="3">Residentado 3</option></select></div>'
           : '') +
@@ -614,7 +616,9 @@ function renderResidentesPorEspecialidad() {
 
   function cargar(residentado) {
     document.getElementById('rpe-contenido').innerHTML = '<div class="loading">Cargando…</div>';
-    apiGet('getResidentesPorEspecialidad', { residentado: residentado }).then(function (res) {
+    var params = { residentado: residentado };
+    if (esDoctor) params.doctor = state.usuario.nombre; // el doctor solo ve su propio servicio
+    apiGet('getResidentesPorEspecialidad', params).then(function (res) {
       var cont = document.getElementById('rpe-contenido');
       if (!res.ok) { cont.innerHTML = '<div class="error-msg">' + escapeHtml(res.error || 'Error al cargar.') + '</div>'; return; }
       if (!res.meses.length) { cont.innerHTML = '<div class="empty-state">Aún no hay residentes asignados en meses vigentes.</div>'; return; }
