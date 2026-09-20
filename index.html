@@ -259,6 +259,60 @@
   .loading { text-align: center; color: var(--gris); padding: 34px 10px; font-size: 13.5px; }
   .hidden { display: none !important; }
   .empty-state { text-align: center; color: var(--gris); padding: 30px; background: var(--superficie); border: 1px dashed var(--borde); border-radius: var(--radio); font-size: 13.5px; }
+
+  /* ---------- Selector de archivo personalizado ---------- */
+  .file-picker { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .file-picker input[type=file] { display: none; }
+  .file-picker .file-btn {
+    background: var(--gris-claro);
+    color: var(--azul-oscuro);
+    border: 1.5px dashed var(--azul-medio);
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-size: 13.5px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: background .12s;
+  }
+  .file-picker .file-btn:hover { background: #E2ECF1; }
+  .file-picker .file-nombre { font-size: 13px; color: var(--gris); }
+  .file-picker .file-nombre.elegido { color: var(--verde); font-weight: 600; }
+
+  /* ---------- Modal de confirmación ---------- */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,52,79,0.45);
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px; z-index: 1000;
+    animation: modal-fade-in .15s ease-out;
+  }
+  @keyframes modal-fade-in { from { opacity: 0; } to { opacity: 1; } }
+  .modal-caja {
+    background: var(--superficie); border-radius: var(--radio);
+    max-width: 400px; width: 100%; padding: 24px;
+    box-shadow: 0 20px 50px rgba(0,52,79,0.3);
+    border-top: 4px solid var(--celeste);
+    animation: modal-pop .15s ease-out;
+  }
+  @keyframes modal-pop { from { transform: translateY(8px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  .modal-caja h3 { margin: 0 0 10px; color: var(--azul-oscuro); font-size: 16.5px; }
+  .modal-caja p { margin: 0; color: var(--texto); font-size: 14px; line-height: 1.6; white-space: pre-line; }
+  .modal-botones { display: flex; gap: 10px; margin-top: 20px; }
+  .modal-botones button { flex: 1; margin-top: 0; }
+
+  /* ---------- Notificación flotante (reemplaza alertas del navegador) ---------- */
+  .toast-wrap { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 1100; display: flex; flex-direction: column; gap: 8px; align-items: center; }
+  .toast {
+    padding: 12px 20px; border-radius: 8px; font-size: 13.5px; font-weight: 600;
+    box-shadow: 0 10px 28px rgba(0,52,79,0.18);
+    animation: toast-in .18s ease-out;
+    max-width: 90vw;
+  }
+  @keyframes toast-in { from { transform: translateY(-12px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  .toast.exito { background: var(--verde-fondo); color: var(--verde); border: 1px solid rgba(47,158,104,0.3); }
+  .toast.falla { background: var(--rojo-fondo); color: var(--rojo); border: 1px solid rgba(214,69,69,0.3); }
 </style>
 </head>
 <body>
@@ -306,7 +360,7 @@ function render() {
   var v = state.vista;
   if (v === 'menu') renderMenu();
   else if (v === 'registro') renderRegistro();
-  else if (v === 'residentes-por-subprograma') renderResidentesPorSubprograma();
+  else if (v === 'residentes-por-programa') renderResidentesPorPrograma();
   else if (v === 'documentos') renderDocumentos();
   else renderMenu();
 }
@@ -329,6 +383,68 @@ function shell(contentHtml) {
 function escapeHtml(s) {
   return String(s || '').replace(/[&<>"']/g, function (c) {
     return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+  });
+}
+
+// ---------------- Modal de confirmación (reemplaza confirm() del navegador) ----------------
+function mostrarConfirmacion(titulo, mensaje) {
+  return new Promise(function (resolve) {
+    var overlay = document.createElement('div');
+    overlay.className = 'modal-overlay';
+    overlay.innerHTML =
+      '<div class="modal-caja">' +
+        '<h3>' + escapeHtml(titulo) + '</h3>' +
+        '<p>' + escapeHtml(mensaje) + '</p>' +
+        '<div class="modal-botones">' +
+          '<button class="secondary" id="modal-cancelar">Cancelar</button>' +
+          '<button class="primary" id="modal-confirmar" style="margin-top:0">Confirmar</button>' +
+        '</div>' +
+      '</div>';
+    document.body.appendChild(overlay);
+    function cerrar(resultado) { document.body.removeChild(overlay); resolve(resultado); }
+    overlay.querySelector('#modal-confirmar').onclick = function () { cerrar(true); };
+    overlay.querySelector('#modal-cancelar').onclick = function () { cerrar(false); };
+    overlay.onclick = function (e) { if (e.target === overlay) cerrar(false); };
+  });
+}
+
+// ---------------- Notificación flotante (reemplaza alert() del navegador) ----------------
+function mostrarToast(mensaje, tipo) {
+  var wrap = document.getElementById('toast-wrap');
+  if (!wrap) {
+    wrap = document.createElement('div');
+    wrap.id = 'toast-wrap';
+    wrap.className = 'toast-wrap';
+    document.body.appendChild(wrap);
+  }
+  var toast = document.createElement('div');
+  toast.className = 'toast ' + (tipo === 'error' ? 'falla' : 'exito');
+  toast.textContent = mensaje;
+  wrap.appendChild(toast);
+  setTimeout(function () { toast.remove(); }, 3600);
+}
+
+// ---------------- Selector de archivo personalizado ----------------
+// Crea un input[type=file] oculto con un botón estilizado al lado, y
+// devuelve el HTML. onChangeCallback(file) se llama cuando eligen algo.
+function crearSelectorArchivo(id) {
+  return '<div class="file-picker">' +
+    '<input type="file" id="' + id + '" accept="application/pdf" />' +
+    '<label class="file-btn" for="' + id + '">📎 Elegir archivo PDF</label>' +
+    '<span class="file-nombre" id="' + id + '-nombre">Ningún archivo seleccionado</span>' +
+  '</div>';
+}
+function activarSelectorArchivo(id) {
+  var input = document.getElementById(id);
+  var nombre = document.getElementById(id + '-nombre');
+  input.addEventListener('change', function () {
+    if (input.files.length) {
+      nombre.textContent = input.files[0].name;
+      nombre.className = 'file-nombre elegido';
+    } else {
+      nombre.textContent = 'Ningún archivo seleccionado';
+      nombre.className = 'file-nombre';
+    }
   });
 }
 
@@ -386,7 +502,7 @@ function renderMenu() {
   if (rol === 'area_archivos') {
     items.push({ vista: 'documentos', titulo: 'Registrar archivos', desc: 'Sube documentos PDF públicos del residentado.' });
   }
-  items.push({ vista: 'residentes-por-subprograma', titulo: 'Residentes por subprograma', desc: (rol === 'doctor' ? 'Consulta qué residentes tienes asignados a tu servicio, por mes.' : 'Consulta qué residentes tiene cada doctor por mes.') });
+  items.push({ vista: 'residentes-por-programa', titulo: 'Residentes por Programa', desc: (rol === 'doctor' ? 'Consulta qué residentes tienes asignados a tu servicio, este mes.' : 'Elige un programa y consulta quiénes están asignados, este mes.') });
   if (rol === 'estudiante' || rol === 'doctor') {
     items.push({ vista: 'documentos', titulo: 'Documentos', desc: 'Revisa los documentos publicados por el área correspondiente.' });
   }
@@ -446,9 +562,10 @@ function pintarSubirPlan(cont, res) {
       '<p class="panel-sub">Antes de matricular tus meses de este año, debes subir tu plan de trabajo en PDF.</p>' +
       '<div id="plan-msg"></div>' +
       '<label>Archivo PDF</label>' +
-      '<input id="plan-archivo" type="file" accept="application/pdf" />' +
+      crearSelectorArchivo('plan-archivo') +
       '<button class="primary" id="btn-subir-plan">Subir plan de trabajo</button>' +
     '</div>';
+  activarSelectorArchivo('plan-archivo');
 
   document.getElementById('btn-subir-plan').onclick = function () {
     var input = document.getElementById('plan-archivo');
@@ -470,7 +587,7 @@ function pintarSubirPlan(cont, res) {
         fileName: file.name,
         mimeType: file.type
       }).then(function (r) {
-        if (r.ok) { cargarRegistro(); }
+        if (r.ok) { mostrarToast(r.mensaje, 'exito'); cargarRegistro(); }
         else {
           btn.disabled = false; btn.textContent = 'Subir plan de trabajo';
           msgBox.innerHTML = '<div class="error-msg">' + escapeHtml(r.error) + '</div>';
@@ -504,18 +621,20 @@ function pintarElegirPrograma(cont, res) {
     var sel = document.getElementById('sel-programa');
     var msgBox = document.getElementById('programa-msg');
     if (!sel.value) { msgBox.innerHTML = '<div class="error-msg">Elige un programa.</div>'; return; }
-    if (!confirm('¿Confirmas este programa? No podrás cambiarlo después.')) return;
-    var btn = document.getElementById('btn-elegir-programa');
-    btn.disabled = true; btn.textContent = 'Guardando...';
-    apiPost('elegirPrograma', { dni: state.usuario.dni, programaCodigo: sel.value }).then(function (r) {
-      if (r.ok) { cargarRegistro(); }
-      else {
+    mostrarConfirmacion('Confirmar programa', '¿Confirmas este programa? No podrás cambiarlo después.').then(function (ok) {
+      if (!ok) return;
+      var btn = document.getElementById('btn-elegir-programa');
+      btn.disabled = true; btn.textContent = 'Guardando...';
+      apiPost('elegirPrograma', { dni: state.usuario.dni, programaCodigo: sel.value }).then(function (r) {
+        if (r.ok) { mostrarToast(r.mensaje, 'exito'); cargarRegistro(); }
+        else {
+          btn.disabled = false; btn.textContent = 'Confirmar programa';
+          msgBox.innerHTML = '<div class="error-msg">' + escapeHtml(r.error) + '</div>';
+        }
+      }).catch(function (err) {
         btn.disabled = false; btn.textContent = 'Confirmar programa';
-        msgBox.innerHTML = '<div class="error-msg">' + escapeHtml(r.error) + '</div>';
-      }
-    }).catch(function (err) {
-      btn.disabled = false; btn.textContent = 'Confirmar programa';
-      msgBox.innerHTML = '<div class="error-msg">Error de conexión: ' + escapeHtml(err.message || err) + '</div>';
+        msgBox.innerHTML = '<div class="error-msg">Error de conexión: ' + escapeHtml(err.message || err) + '</div>';
+      });
     });
   };
 }
@@ -566,20 +685,22 @@ function pintarMatricula(cont, res) {
     if (!sel.value) { msgBox.innerHTML = '<div class="error-msg">Elige una opción.</div>'; return; }
     var partes = sel.value.split('|');
     var subprograma = partes[0], turno = partes[1];
-    if (!confirm('¿Confirmas "' + subprograma + '" para ' + res.mesActivo.label + '?\n\nUna vez enviado, este registro no podrá modificarse.')) return;
-
-    btn.disabled = true; btn.textContent = 'Registrando...';
-    sel.disabled = true;
-    apiPost('registrarAsignacion', { dni: state.usuario.dni, subprograma: subprograma, turno: turno }).then(function (r) {
-      if (r.ok) { cargarRegistro(); }
-      else {
+    mostrarConfirmacion('Confirmar matrícula', '¿Confirmas "' + subprograma + '" para ' + res.mesActivo.label + '?\n\nUna vez enviado, este registro no podrá modificarse.').then(function (ok) {
+      if (!ok) return;
+      btn.disabled = true; btn.textContent = 'Registrando...';
+      sel.disabled = true;
+      apiPost('registrarAsignacion', { dni: state.usuario.dni, subprograma: subprograma, turno: turno }).then(function (r) {
+        if (r.ok) { mostrarToast(r.mensaje, 'exito'); cargarRegistro(); }
+        else {
+          btn.disabled = false; btn.textContent = 'Registrar mes'; sel.disabled = false;
+          msgBox.innerHTML = '<div class="error-msg">' + escapeHtml(r.error) + '</div>';
+          mostrarToast(r.error, 'error');
+          cargarRegistro();
+        }
+      }).catch(function (err) {
         btn.disabled = false; btn.textContent = 'Registrar mes'; sel.disabled = false;
-        msgBox.innerHTML = '<div class="error-msg">' + escapeHtml(r.error) + '</div>';
-        cargarRegistro();
-      }
-    }).catch(function (err) {
-      btn.disabled = false; btn.textContent = 'Registrar mes'; sel.disabled = false;
-      msgBox.innerHTML = '<div class="error-msg">Error de conexión: ' + escapeHtml(err.message || err) + '</div>';
+        msgBox.innerHTML = '<div class="error-msg">Error de conexión: ' + escapeHtml(err.message || err) + '</div>';
+      });
     });
   };
 }
@@ -587,35 +708,60 @@ function pintarMatricula(cont, res) {
 // ==================================================================
 // RESIDENTES POR SUBPROGRAMA
 // ==================================================================
-function renderResidentesPorSubprograma() {
+function renderResidentesPorPrograma() {
   var esDoctor = rolNormalizado() === 'doctor';
-  shell(backLink() + '<h2 class="section-title">Residentes por subprograma</h2>' +
-        '<p class="section-sub">' + (esDoctor ? 'Residentes que tienes asignados a tu servicio, por mes.' : 'Vista por mes, programa, subprograma y doctor a cargo.') + '</p>' +
-        '<div id="rps-contenido" class="loading">Cargando…</div>');
+  shell(backLink() + '<h2 class="section-title">Residentes por Programa</h2>' +
+        '<p class="section-sub" id="rpp-sub">' + (esDoctor ? 'Residentes que tienes asignados a tu servicio, este mes.' : 'Elige un programa para ver quiénes están asignados este mes.') + '</p>' +
+        '<div id="rpp-contenido" class="loading">Cargando…</div>');
 
   var params = {};
   if (esDoctor) params.doctor = state.usuario.nombre;
 
-  apiGet('getResidentesPorSubprograma', params).then(function (res) {
-    var cont = document.getElementById('rps-contenido');
+  apiGet('getResidentesPorPrograma', params).then(function (res) {
+    var cont = document.getElementById('rpp-contenido');
     if (!res.ok) { cont.innerHTML = '<div class="error-msg">' + escapeHtml(res.error || 'Error al cargar.') + '</div>'; return; }
-    if (!res.meses.length) { cont.innerHTML = '<div class="empty-state">Aún no hay residentes asignados.</div>'; return; }
 
-    var html = '';
-    res.meses.forEach(function (mes) {
-      html += '<div class="mes-bloque"><h3>' + escapeHtml(mes.mesKey) + '</h3>';
-      mes.bloques.forEach(function (b) {
-        html += '<div class="esp-fila"><div class="esp-nombre">' + escapeHtml(b.programa) + ' — ' + escapeHtml(b.subprograma) +
+    document.getElementById('rpp-sub').textContent =
+      (esDoctor ? 'Residentes que tienes asignados a tu servicio en ' : 'Elige un programa para ver quiénes están asignados en ') + res.mesActual.label + '.';
+
+    function pintarBloques(programa) {
+      if (!programa.bloques.length) return '<div class="empty-state">Sin residentes asignados en ' + escapeHtml(res.mesActual.label) + ' para este programa.</div>';
+      return programa.bloques.map(function (b) {
+        return '<div class="esp-fila"><div class="esp-nombre">' + escapeHtml(b.subprograma) +
           (b.turno && b.turno !== 'único' ? ' (' + escapeHtml(b.turno) + ')' : '') + '</div>' +
           '<div class="esp-doctor">Doctor a cargo: ' + escapeHtml(b.doctor || '—') + '</div>' +
           '<div class="estudiantes">' + b.estudiantes.map(function (e) { return '<span class="chip">' + escapeHtml(e.nombre) + '</span>'; }).join('') + '</div>' +
           '</div>';
-      });
-      html += '</div>';
+      }).join('');
+    }
+
+    if (esDoctor) {
+      // El doctor ya está filtrado a su propio servicio: se muestran directo sus programas con datos, sin lista para elegir.
+      var conDatos = res.programas.filter(function (p) { return p.bloques.length; });
+      cont.innerHTML = conDatos.length
+        ? conDatos.map(function (p) { return '<div class="mes-bloque"><h3>' + escapeHtml(p.nombre) + '</h3>' + pintarBloques(p) + '</div>'; }).join('')
+        : '<div class="empty-state">No tienes residentes asignados en ' + escapeHtml(res.mesActual.label) + '.</div>';
+      return;
+    }
+
+    // Lista de programas para elegir
+    cont.innerHTML = '<div class="menu-lista" id="rpp-lista">' + res.programas.map(function (p) {
+      return '<div class="menu-item" data-programa="' + escapeHtml(p.codigo) + '">' +
+        '<div class="texto"><h3>' + escapeHtml(p.nombre) + '</h3><p>' + p.bloques.length + ' subprograma(s) con residentes este mes</p></div>' +
+        '<div class="flecha">&rsaquo;</div></div>';
+    }).join('') + '</div><div id="rpp-detalle"></div>';
+
+    document.querySelectorAll('#rpp-lista .menu-item').forEach(function (el) {
+      el.onclick = function () {
+        var codigo = el.getAttribute('data-programa');
+        var programa = res.programas.filter(function (p) { return p.codigo === codigo; })[0];
+        document.getElementById('rpp-detalle').innerHTML =
+          '<div class="mes-bloque"><h3>' + escapeHtml(programa.nombre) + ' — ' + escapeHtml(res.mesActual.label) + '</h3>' + pintarBloques(programa) + '</div>';
+        document.getElementById('rpp-detalle').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      };
     });
-    cont.innerHTML = html;
   }).catch(function (err) {
-    document.getElementById('rps-contenido').innerHTML = '<div class="error-msg">Error de conexión: ' + escapeHtml(err.message || err) + '</div>';
+    document.getElementById('rpp-contenido').innerHTML = '<div class="error-msg">Error de conexión: ' + escapeHtml(err.message || err) + '</div>';
   });
 }
 
@@ -640,7 +786,7 @@ function renderDocumentos() {
         '<label>Fecha de emisión</label>' +
         '<input id="doc-fecha" type="date" />' +
         '<label>Archivo PDF</label>' +
-        '<input id="doc-archivo" type="file" accept="application/pdf" />' +
+        crearSelectorArchivo('doc-archivo') +
         '<button class="primary" id="btn-subir-doc">Subir documento</button>' +
       '</div>';
   }
@@ -654,6 +800,7 @@ function renderDocumentos() {
           '<button class="secondary" id="btn-filtrar">Filtrar</button>' +
         '</div>' +
         '<div id="doc-lista" class="loading">Cargando documentos…</div>');
+  if (esArea) activarSelectorArchivo('doc-archivo');
 
   function cargarDocs() {
     var params = {};
@@ -708,7 +855,7 @@ function renderDocumentos() {
           dniArea: state.usuario.dni, fileBase64: base64, fileName: file.name, mimeType: file.type
         }).then(function (res) {
           btn.disabled = false; btn.textContent = 'Subir documento';
-          if (res.ok) { msgBox.innerHTML = '<div class="success-msg">Documento subido correctamente.</div>'; archivoInput.value = ''; cargarDocs(); }
+          if (res.ok) { mostrarToast('Documento subido correctamente.', 'exito'); archivoInput.value = ''; document.getElementById(archivoInput.id + '-nombre').textContent = 'Ningún archivo seleccionado'; document.getElementById(archivoInput.id + '-nombre').className = 'file-nombre'; cargarDocs(); }
           else { msgBox.innerHTML = '<div class="error-msg">' + escapeHtml(res.error || 'No se pudo subir el documento.') + '</div>'; }
         }).catch(function (err) {
           btn.disabled = false; btn.textContent = 'Subir documento';
