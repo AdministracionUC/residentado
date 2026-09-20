@@ -38,7 +38,6 @@
   a { color: var(--azul-medio); }
   :focus-visible { outline: 3px solid var(--celeste); outline-offset: 2px; }
 
-  /* ---------- Barra superior ---------- */
   header.topbar {
     background: var(--azul);
     background-image: linear-gradient(180deg, var(--azul) 0%, var(--azul-oscuro) 100%);
@@ -78,7 +77,6 @@
 
   main { max-width: 1300px; margin: 0 auto; padding: 24px 18px 70px; }
 
-  /* ---------- Login ---------- */
   .login-wrap {
     min-height: 100vh;
     display: flex;
@@ -159,8 +157,16 @@
     margin-top: 12px;
     border: 1px solid rgba(47,158,104,0.25);
   }
+  .info-msg {
+    background: #E6F1FB;
+    color: var(--azul-oscuro);
+    padding: 11px 13px;
+    border-radius: 8px;
+    font-size: 13.5px;
+    margin-top: 12px;
+    border: 1px solid rgba(0,76,115,0.15);
+  }
 
-  /* ---------- Menú principal ---------- */
   .pagina-titulo { color: var(--azul-oscuro); margin: 4px 0 22px; font-size: 22px; }
   .menu-lista { display: flex; flex-direction: column; gap: 10px; margin-top: 18px; }
   .menu-item {
@@ -187,19 +193,18 @@
   h2.section-title { color: var(--azul-oscuro); margin: 0 0 4px; font-size: 20px; }
   p.section-sub { color: var(--gris); margin: 0 0 20px; font-size: 13.5px; }
 
-  /* ---------- Layout matrícula (tabla + panel) ---------- */
   .layout-matricula {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 300px;
+    grid-template-columns: minmax(0, 1fr) 320px;
     gap: 18px;
     align-items: start;
   }
   @media (max-width: 860px) {
     .layout-matricula { grid-template-columns: 1fr; }
-    .panel-matricula { order: -1; }
+    .panel-lateral { order: -1; }
   }
 
-  .panel-matricula {
+  .panel-lateral {
     background: var(--superficie);
     border-radius: var(--radio);
     border: 1px solid var(--borde);
@@ -207,17 +212,14 @@
     position: sticky;
     top: 18px;
   }
-  .panel-matricula h3 { margin: 0 0 4px; color: var(--azul-oscuro); font-size: 16px; }
-  .panel-matricula .panel-sub { margin: 0 0 6px; font-size: 12.5px; color: var(--gris); line-height: 1.5; }
+  .panel-lateral h3 { margin: 0 0 4px; color: var(--azul-oscuro); font-size: 16px; }
+  .panel-lateral .panel-sub { margin: 0 0 6px; font-size: 12.5px; color: var(--gris); line-height: 1.5; }
   .progreso-wrap { margin: 14px 0 6px; }
   .progreso-barra { height: 8px; background: var(--gris-claro); border-radius: 100px; overflow: hidden; }
   .progreso-relleno { height: 100%; background: var(--celeste); border-radius: 100px; transition: width .25s; }
   .progreso-texto { font-size: 12px; color: var(--gris); margin-top: 6px; }
 
-  .panel-completo {
-    text-align: center;
-    padding: 18px 6px 4px;
-  }
+  .panel-completo { text-align: center; padding: 18px 6px 4px; }
   .panel-completo .check-circulo {
     width: 52px; height: 52px; border-radius: 50%;
     background: var(--verde-fondo); color: var(--verde);
@@ -227,23 +229,13 @@
   .panel-completo h3 { color: var(--azul-oscuro); margin: 0 0 8px; }
   .panel-completo p { color: var(--gris); font-size: 13.5px; line-height: 1.6; margin: 0; }
 
-  /* ---------- Tabla horario (solo lectura) ---------- */
-  .tabla-wrap { overflow-x: auto; background: var(--superficie); border: 1px solid var(--borde); border-radius: var(--radio); padding: 6px; }
-  table.horario { border-collapse: collapse; width: 100%; font-size: 12px; }
-  table.horario th, table.horario td { border: 1px solid var(--borde); padding: 6px 6px; text-align: center; white-space: nowrap; }
-  table.horario th { background: var(--gris-claro); color: var(--azul-oscuro); font-weight: 700; position: sticky; top: 0; z-index: 3; }
-  table.horario th.mes-col { position: sticky; left: 0; background: var(--gris-claro); text-align: left; z-index: 4; }
-  table.horario td.mes-col { position: sticky; left: 0; background: var(--superficie); text-align: left; font-weight: 600; z-index: 1; }
-  .celda { padding: 6px 8px; border-radius: 6px; font-size: 11.5px; }
-  .celda.disponible { background: #F0F5F8; color: var(--gris); }
-  .celda.mia { background: var(--verde); color: white; font-weight: 700; }
-  .celda.lleno { background: #F3F4F6; color: #97A2AA; text-decoration: line-through; }
-  .celda.usada { background: var(--rojo-fondo); color: var(--rojo); text-decoration: line-through; }
-  .celda.bloqueada-mes { background: #F3F4F6; color: #97A2AA; }
-  .leyenda { display: flex; gap: 16px; flex-wrap: wrap; margin: 0 0 12px; font-size: 12px; color: var(--gris); }
-  .leyenda span.box { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 5px; vertical-align: middle; }
+  .historial { background: var(--superficie); border: 1px solid var(--borde); border-radius: var(--radio); overflow: hidden; }
+  .historial-fila { display: flex; justify-content: space-between; padding: 12px 16px; border-top: 1px solid var(--borde); font-size: 13.5px; }
+  .historial-fila:first-child { border-top: none; }
+  .historial-fila .mes { font-weight: 600; color: var(--azul-oscuro); }
+  .historial-fila .detalle { color: var(--gris); text-align: right; }
+  .historial-fila.vacio { color: var(--gris); font-style: italic; }
 
-  /* ---------- Vista por especialidad ---------- */
   .mes-bloque { background: var(--superficie); border: 1px solid var(--borde); border-radius: var(--radio); padding: 18px 20px; margin-bottom: 14px; }
   .mes-bloque h3 { margin-top: 0; color: var(--azul-oscuro); font-size: 15.5px; }
   .esp-fila { border-top: 1px solid var(--borde); padding: 11px 0; }
@@ -253,7 +245,6 @@
   .esp-fila .estudiantes { margin-top: 5px; font-size: 13px; }
   .chip { display: inline-block; background: var(--gris-claro); color: var(--azul-oscuro); padding: 3px 10px; border-radius: 100px; margin: 2px 4px 0 0; font-size: 12px; font-weight: 600; }
 
-  /* ---------- Documentos ---------- */
   .filtros { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 18px; }
   .filtros select, .filtros input { width: auto; min-width: 160px; }
   .doc-list { display: grid; gap: 10px; }
@@ -277,7 +268,6 @@
 <script>
 /*************** CONFIGURACIÓN — CAMBIAR ANTES DE PUBLICAR ***************/
 var CONFIG = {
-  // Pega aquí la URL /exec de tu Web App de Apps Script
   API_URL: 'https://script.google.com/macros/s/AKfycbwjHax-dtvCnDHDK0eKAwDay60sq2D40spfribYMrbNQR_HFY4wN4WUTVg1G2ISGnc4/exec'
 };
 /***************************************************************************/
@@ -289,7 +279,6 @@ var state = {
 
 var app = document.getElementById('app');
 
-// ---------------- Helpers de red ----------------
 function apiGet(action, params) {
   var qs = new URLSearchParams(Object.assign({ action: action }, params || {})).toString();
   return fetch(CONFIG.API_URL + '?' + qs).then(function (r) { return r.json(); });
@@ -297,7 +286,7 @@ function apiGet(action, params) {
 function apiPost(action, payload) {
   return fetch(CONFIG.API_URL, {
     method: 'POST',
-    headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // evita preflight CORS
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
     body: JSON.stringify(Object.assign({ action: action }, payload || {}))
   }).then(function (r) { return r.json(); });
 }
@@ -308,20 +297,18 @@ function logout() {
   state.usuario = null;
   setVista('menu');
 }
+function rolNormalizado() {
+  return state.usuario ? String(state.usuario.rol || '').toLowerCase().trim() : '';
+}
 
-// ---------------- Render principal ----------------
 function render() {
   if (!state.usuario) { renderLogin(); return; }
   var v = state.vista;
   if (v === 'menu') renderMenu();
-  else if (v === 'registrar-residentado') renderMatricula();
-  else if (v === 'residentes-por-especialidad') renderResidentesPorEspecialidad();
+  else if (v === 'registro') renderRegistro();
+  else if (v === 'residentes-por-subprograma') renderResidentesPorSubprograma();
   else if (v === 'documentos') renderDocumentos();
   else renderMenu();
-}
-
-function rolNormalizado() {
-  return state.usuario ? String(state.usuario.rol || '').toLowerCase().trim() : '';
 }
 
 function shell(contentHtml) {
@@ -367,10 +354,7 @@ function renderLogin() {
     var pass = document.getElementById('in-pass').value.trim();
     var errBox = document.getElementById('login-error');
     errBox.innerHTML = '';
-    if (!dni || !pass) {
-      errBox.innerHTML = '<div class="error-msg">Ingresa tu DNI y tu contraseña.</div>';
-      return;
-    }
+    if (!dni || !pass) { errBox.innerHTML = '<div class="error-msg">Ingresa tu DNI y tu contraseña.</div>'; return; }
     var btn = document.getElementById('btn-login');
     btn.disabled = true; btn.textContent = 'Ingresando...';
     apiPost('login', { dni: dni, password: pass }).then(function (res) {
@@ -397,12 +381,12 @@ function renderMenu() {
   var items = [];
 
   if (rol === 'estudiante') {
-    items.push({ vista: 'registrar-residentado', titulo: 'Registrar residentado', desc: 'Elige tu especialidad para cada mes del año, uno a la vez.' });
+    items.push({ vista: 'registro', titulo: 'Registro', desc: 'Sube tu plan de trabajo, elige tu programa y matricula tus meses.' });
   }
   if (rol === 'area_archivos') {
-    items.push({ vista: 'documentos', titulo: 'Registrar archivos', desc: 'Sube documentos PDF del residentado.' });
+    items.push({ vista: 'documentos', titulo: 'Registrar archivos', desc: 'Sube documentos PDF públicos del residentado.' });
   }
-  items.push({ vista: 'residentes-por-especialidad', titulo: 'Residentes asignados por especialidad', desc: (rol === 'doctor' ? 'Consulta qué residentes tienes asignados a tu servicio, por mes.' : 'Consulta qué residentes tiene cada doctor por mes.') });
+  items.push({ vista: 'residentes-por-subprograma', titulo: 'Residentes por subprograma', desc: (rol === 'doctor' ? 'Consulta qué residentes tienes asignados a tu servicio, por mes.' : 'Consulta qué residentes tiene cada doctor por mes.') });
   if (rol === 'estudiante' || rol === 'doctor') {
     items.push({ vista: 'documentos', titulo: 'Documentos', desc: 'Revisa los documentos publicados por el área correspondiente.' });
   }
@@ -416,7 +400,6 @@ function renderMenu() {
   html += '</div>';
 
   shell(html);
-
   document.querySelectorAll('.menu-item').forEach(function (el) {
     el.onclick = function () { setVista(el.getAttribute('data-vista')); };
   });
@@ -427,256 +410,220 @@ function backLink() {
 }
 
 // ==================================================================
-// REGISTRAR RESIDENTADO — tabla informativa + panel de matrícula
+// REGISTRO — subir plan -> elegir programa -> matricular subprograma
 // ==================================================================
-var horarioData = null; // cache de la última respuesta de getHorario
-
-function renderMatricula() {
-  shell(backLink() + '<h2 class="section-title">Registrar residentado</h2>' +
-        '<p class="section-sub">Residentado ' + escapeHtml(state.usuario.residentado) + ' — la matrícula se habilita mes a mes: al cerrar un mes se abre automáticamente el siguiente. La tabla de la izquierda es solo referencial.</p>' +
-        '<div id="matricula-contenido" class="loading">Cargando tu horario…</div>');
-
-  cargarHorario();
+function renderRegistro() {
+  shell(backLink() + '<h2 class="section-title">Registro</h2>' +
+        '<p class="section-sub">Tu plan de trabajo y tu matrícula, año por año.</p>' +
+        '<div id="registro-contenido" class="loading">Cargando tu información…</div>');
+  cargarRegistro();
 }
 
-function cargarHorario() {
-  apiGet('getHorario', { residentado: state.usuario.residentado, dni: state.usuario.dni }).then(function (res) {
-    var cont = document.getElementById('matricula-contenido');
-    if (!res.ok) { cont.innerHTML = '<div class="error-msg">' + escapeHtml(res.error || 'Error al cargar el horario.') + '</div>'; return; }
-    horarioData = res;
-    cont.innerHTML = '<div class="layout-matricula">' +
-      '<div>' + construirTablaHorarioHtml(res) + '</div>' +
-      '<div id="panel-matricula">' + construirPanelMatriculaHtml(res) + '</div>' +
-      '</div>';
-    activarPanelMatricula(res);
-  }).catch(function (err) {
-    document.getElementById('matricula-contenido').innerHTML = '<div class="error-msg">Error de conexión: ' + escapeHtml(err.message || err) + '</div>';
-  });
-}
+function cargarRegistro() {
+  apiGet('getEstado', { dni: state.usuario.dni }).then(function (res) {
+    var cont = document.getElementById('registro-contenido');
+    if (!res.ok) { cont.innerHTML = '<div class="error-msg">' + escapeHtml(res.error || 'Error al cargar tu información.') + '</div>'; return; }
 
-function construirTablaHorarioHtml(res) {
-  var meses = res.meses, especialidades = res.especialidades, matriz = res.matriz;
-
-  var html = '<div class="leyenda">' +
-    '<span><span class="box" style="background:#F0F5F8"></span>Disponible</span>' +
-    '<span><span class="box" style="background:#2F9E68"></span>Tu elección</span>' +
-    '<span><span class="box" style="background:#FBEAEA"></span>Ya la usaste</span>' +
-    '<span><span class="box" style="background:#F3F4F6"></span>Sin cupo / mes ocupado</span>' +
-    '</div>';
-  html += '<div class="tabla-wrap"><table class="horario"><thead><tr><th class="mes-col">Mes</th>';
-  especialidades.forEach(function (e) {
-    html += '<th>' + escapeHtml(e.nombre) + (e.turno && e.turno !== 'único' ? '<br><small>(' + escapeHtml(e.turno) + ')</small>' : '') + '<br><small style="font-weight:400">' + escapeHtml(e.doctor) + '</small></th>';
-  });
-  html += '</tr></thead><tbody>';
-
-  meses.forEach(function (mes) {
-    html += '<tr><td class="mes-col">' + escapeHtml(mes.label) + '</td>';
-    especialidades.forEach(function (esp) {
-      var celda = matriz[mes.key][esp.codigo + '|' + esp.turno];
-      var claseCelda, texto;
-      if (celda.esLaMia) { claseCelda = 'mia'; texto = '✓'; }
-      else if (celda.yaUsadaPorMi) { claseCelda = 'usada'; texto = '—'; }
-      else if (celda.bloqueadaPorOtroMes) { claseCelda = 'bloqueada-mes'; texto = '—'; }
-      else if (celda.lleno) { claseCelda = 'lleno'; texto = 'Sin cupo'; }
-      else { claseCelda = 'disponible'; texto = celda.ocupados + '/' + celda.cupoMaximo; }
-      html += '<td><div class="celda ' + claseCelda + '">' + texto + '</div></td>';
-    });
-    html += '</tr>';
-  });
-  html += '</tbody></table></div>';
-  return html;
-}
-
-// El mes "activo" es el primer mes del año de residentado (en el orden
-// configurado, empezando en el mes de inicio) que el estudiante TODAVÍA
-// no ha registrado. En cuanto registra ese mes, deja de ser el activo y
-// automáticamente pasa a ser el siguiente — no depende de la fecha real
-// de la computadora, sino de que el estudiante ya haya terminado ese mes.
-function obtenerMesActivo(meses, misAsignaciones) {
-  for (var i = 0; i < meses.length; i++) {
-    if (!misAsignaciones[meses[i].key]) return meses[i];
-  }
-  return null; // ya registró los 12 meses
-}
-
-function construirPanelMatriculaHtml(res) {
-  var meses = res.meses;
-  var totalMeses = meses.length;
-  var misAsignaciones = res.misAsignaciones || {};
-  var registrados = Object.keys(misAsignaciones).length;
-
-  if (registrados >= totalMeses) {
-    return '<div class="panel-completo">' +
-      '<div class="check-circulo">&#10003;</div>' +
-      '<h3>Registro completo</h3>' +
-      '<p>Gracias — ya registraste tus ' + totalMeses + ' meses de residentado. Esta información ha quedado guardada y no podrá ser modificada. Cualquier corrección debe solicitarse directamente en la oficina.</p>' +
-      '</div>';
-  }
-
-  var pct = Math.round((registrados / totalMeses) * 100);
-  var progresoHtml = '<div class="progreso-wrap">' +
-      '<div class="progreso-barra"><div class="progreso-relleno" style="width:' + pct + '%"></div></div>' +
-      '<div class="progreso-texto">' + registrados + ' de ' + totalMeses + ' meses registrados</div>' +
-    '</div>';
-
-  var mesActivo = obtenerMesActivo(meses, misAsignaciones);
-
-  if (!mesActivo) {
-    return '<h3>Matrícula</h3>' + progresoHtml +
-      '<p class="panel-sub">No hay más meses configurados para matricular. Verifica la hoja Config si esto no es correcto.</p>';
-  }
-
-  if (misAsignaciones[mesActivo.key]) {
-    return '<h3>Matrícula</h3>' + progresoHtml +
-      '<p class="panel-sub">Ya registraste tu especialidad de <strong>' + escapeHtml(mesActivo.label) + '</strong>.</p>';
-  }
-
-  return '<h3>Matrícula</h3>' +
-    '<p class="panel-sub">Mes actual: <strong>' + escapeHtml(mesActivo.label) + '</strong>. Elige la especialidad que quieres cursar este mes.</p>' +
-    progresoHtml +
-    '<div id="matricula-msg"></div>' +
-    '<input type="hidden" id="mes-activo-key" value="' + mesActivo.key + '" />' +
-    '<label>Especialidad</label>' +
-    '<select id="sel-especialidad"></select>' +
-    '<button class="primary" id="btn-matricular">Registrar mes</button>';
-}
-
-function activarPanelMatricula(res) {
-  var selEsp = document.getElementById('sel-especialidad');
-  if (!selEsp) return; // no hay formulario activo (año completo, terminado, o ya registró este mes)
-
-  var especialidades = res.especialidades, matriz = res.matriz;
-  var mesKey = document.getElementById('mes-activo-key').value;
-
-  var opciones = especialidades.map(function (esp) {
-    var celda = matriz[mesKey] ? matriz[mesKey][esp.codigo + '|' + esp.turno] : null;
-    if (!celda) return null;
-    if (celda.yaUsadaPorMi || celda.lleno) return null; // ya no se puede elegir: bloqueado
-    var etiquetaTurno = esp.turno && esp.turno !== 'único' ? ' (' + esp.turno + ')' : '';
-    var cupoTexto = ' — ' + celda.ocupados + '/' + celda.cupoMaximo + ' cupos';
-    return '<option value="' + esp.codigo + '|' + esp.turno + '">' + escapeHtml(esp.nombre + etiquetaTurno + cupoTexto) + '</option>';
-  }).filter(Boolean);
-  selEsp.innerHTML = opciones.length ? opciones.join('') : '<option value="">No hay especialidades disponibles este mes</option>';
-
-  document.getElementById('btn-matricular').onclick = function () {
-    var msgBox = document.getElementById('matricula-msg');
-    msgBox.innerHTML = '';
-    var espVal = selEsp.value;
-    if (!espVal) {
-      msgBox.innerHTML = '<div class="error-msg">Elige una especialidad para continuar.</div>';
+    if (res.residentadoCompleto) {
+      cont.innerHTML = '<div class="panel-completo"><div class="check-circulo">&#10003;</div>' +
+        '<h3>Residentado completo</h3>' +
+        '<p>Completaste tus 3 años de residencia. Gracias — esta información ha quedado guardada y no podrá ser modificada.</p></div>';
       return;
     }
-    var partes = espVal.split('|');
-    var codigo = partes[0], turno = partes[1];
-    var esp = especialidades.filter(function (e) { return e.codigo === codigo && e.turno === turno; })[0];
-    var mesInfo = res.meses.filter(function (m) { return m.key === mesKey; })[0];
 
-    if (!confirm('¿Confirmas "' + (esp ? esp.nombre : codigo) + '" para ' + (mesInfo ? mesInfo.label : mesKey) + '?\n\nUna vez enviado, este registro no podrá modificarse.')) return;
+    if (!res.tienePlan) { pintarSubirPlan(cont, res); return; }
+    if (!res.programa) { pintarElegirPrograma(cont, res); return; }
+    pintarMatricula(cont, res);
+  }).catch(function (err) {
+    document.getElementById('registro-contenido').innerHTML = '<div class="error-msg">Error de conexión: ' + escapeHtml(err.message || err) + '</div>';
+  });
+}
 
-    var btn = document.getElementById('btn-matricular');
-    btn.disabled = true; btn.textContent = 'Registrando...';
-    selEsp.disabled = true; // evita que se alcance a cambiar/enviar de nuevo mientras responde el servidor
-    apiPost('registrarAsignacion', {
-      residentado: state.usuario.residentado,
-      dni: state.usuario.dni,
-      mes: mesKey,
-      especialidadCodigo: codigo,
-      turno: turno
-    }).then(function (r) {
-      btn.disabled = false; btn.textContent = 'Registrar mes'; selEsp.disabled = false;
-      if (r.ok) {
-        msgBox.innerHTML = '<div class="success-msg">' + escapeHtml(r.mensaje) + '</div>';
-        cargarHorario();
-      } else {
+function pintarSubirPlan(cont, res) {
+  cont.innerHTML =
+    '<div class="form-box" style="max-width:520px">' +
+      '<h3>Sube tu plan de trabajo — Año ' + res.anioActivo + '</h3>' +
+      '<p class="panel-sub">Antes de matricular tus meses de este año, debes subir tu plan de trabajo en PDF.</p>' +
+      '<div id="plan-msg"></div>' +
+      '<label>Archivo PDF</label>' +
+      '<input id="plan-archivo" type="file" accept="application/pdf" />' +
+      '<button class="primary" id="btn-subir-plan">Subir plan de trabajo</button>' +
+    '</div>';
+
+  document.getElementById('btn-subir-plan').onclick = function () {
+    var input = document.getElementById('plan-archivo');
+    var msgBox = document.getElementById('plan-msg');
+    msgBox.innerHTML = '';
+    if (!input.files.length) { msgBox.innerHTML = '<div class="error-msg">Selecciona un archivo PDF.</div>'; return; }
+    var file = input.files[0];
+    if (file.type !== 'application/pdf') { msgBox.innerHTML = '<div class="error-msg">Solo se permiten archivos PDF.</div>'; return; }
+
+    var reader = new FileReader();
+    reader.onload = function () {
+      var base64 = reader.result.split(',')[1];
+      var btn = document.getElementById('btn-subir-plan');
+      btn.disabled = true; btn.textContent = 'Subiendo...';
+      apiPost('subirPlanTrabajo', {
+        dni: state.usuario.dni,
+        anioResidencia: res.anioActivo,
+        fileBase64: base64,
+        fileName: file.name,
+        mimeType: file.type
+      }).then(function (r) {
+        if (r.ok) { cargarRegistro(); }
+        else {
+          btn.disabled = false; btn.textContent = 'Subir plan de trabajo';
+          msgBox.innerHTML = '<div class="error-msg">' + escapeHtml(r.error) + '</div>';
+        }
+      }).catch(function (err) {
+        btn.disabled = false; btn.textContent = 'Subir plan de trabajo';
+        msgBox.innerHTML = '<div class="error-msg">Error de conexión: ' + escapeHtml(err.message || err) + '</div>';
+      });
+    };
+    reader.readAsDataURL(file);
+  };
+}
+
+function pintarElegirPrograma(cont, res) {
+  cont.innerHTML = '<div class="form-box" style="max-width:520px">' +
+    '<h3>Elige tu programa</h3>' +
+    '<p class="panel-sub">Esta elección es única para tus 3 años de residencia — no se puede cambiar después.</p>' +
+    '<div id="programa-msg"></div>' +
+    '<label>Programa</label>' +
+    '<select id="sel-programa"><option value="">Cargando…</option></select>' +
+    '<button class="primary" id="btn-elegir-programa">Confirmar programa</button>' +
+  '</div>';
+
+  apiGet('getProgramas', {}).then(function (res2) {
+    var sel = document.getElementById('sel-programa');
+    if (!res2.ok || !res2.programas.length) { sel.innerHTML = '<option value="">No hay programas configurados</option>'; return; }
+    sel.innerHTML = res2.programas.map(function (p) { return '<option value="' + p.codigo + '">' + escapeHtml(p.nombre) + '</option>'; }).join('');
+  });
+
+  document.getElementById('btn-elegir-programa').onclick = function () {
+    var sel = document.getElementById('sel-programa');
+    var msgBox = document.getElementById('programa-msg');
+    if (!sel.value) { msgBox.innerHTML = '<div class="error-msg">Elige un programa.</div>'; return; }
+    if (!confirm('¿Confirmas este programa? No podrás cambiarlo después.')) return;
+    var btn = document.getElementById('btn-elegir-programa');
+    btn.disabled = true; btn.textContent = 'Guardando...';
+    apiPost('elegirPrograma', { dni: state.usuario.dni, programaCodigo: sel.value }).then(function (r) {
+      if (r.ok) { cargarRegistro(); }
+      else {
+        btn.disabled = false; btn.textContent = 'Confirmar programa';
         msgBox.innerHTML = '<div class="error-msg">' + escapeHtml(r.error) + '</div>';
-        cargarHorario(); // por si el cupo o el mes cambiaron mientras decidía, refresca la vista
       }
     }).catch(function (err) {
-      btn.disabled = false; btn.textContent = 'Registrar mes'; selEsp.disabled = false;
+      btn.disabled = false; btn.textContent = 'Confirmar programa';
+      msgBox.innerHTML = '<div class="error-msg">Error de conexión: ' + escapeHtml(err.message || err) + '</div>';
+    });
+  };
+}
+
+function pintarMatricula(cont, res) {
+  var historialHtml = '<div class="historial">';
+  var huboAlguno = false;
+  res.meses.forEach(function (m) {
+    var reg = res.misAsignaciones[m.key];
+    if (reg) {
+      huboAlguno = true;
+      historialHtml += '<div class="historial-fila"><span class="mes">' + escapeHtml(m.label) + '</span>' +
+        '<span class="detalle">' + escapeHtml(reg.subprograma) + (reg.doctor && reg.doctor !== '—' ? ' — ' + escapeHtml(reg.doctor) : '') + '</span></div>';
+    }
+  });
+  if (!huboAlguno) historialHtml += '<div class="historial-fila vacio">Aún no registraste ningún mes de este año.</div>';
+  historialHtml += '</div>';
+
+  var panelHtml;
+  if (!res.mesActivo) {
+    panelHtml = '<h3>Matrícula</h3><p class="panel-sub">Ya registraste los 12 meses de este año.</p>';
+  } else {
+    var pct = Math.round((res.progreso.registrados / res.progreso.total) * 100);
+    panelHtml = '<h3>Matrícula — Año ' + res.anioActivo + '</h3>' +
+      '<p class="panel-sub">Mes actual: <strong>' + escapeHtml(res.mesActivo.label) + '</strong>. Elige el subprograma que quieres cursar este mes.</p>' +
+      '<div class="progreso-wrap"><div class="progreso-barra"><div class="progreso-relleno" style="width:' + pct + '%"></div></div>' +
+      '<div class="progreso-texto">' + res.progreso.registrados + ' de ' + res.progreso.total + ' meses registrados</div></div>' +
+      '<div id="matricula-msg"></div>' +
+      '<label>Subprograma</label>' +
+      '<select id="sel-subprograma">' + res.opciones.map(function (o) {
+        var etiqueta = o.esVacaciones ? 'Vacaciones' : o.nombre + ' — ' + o.doctor + ' (' + o.ocupados + '/' + o.cupoMaximo + ' cupos)';
+        var valor = o.nombre + '|' + o.turno;
+        return '<option value="' + valor + '">' + escapeHtml(etiqueta) + '</option>';
+      }).join('') + '</select>' +
+      '<button class="primary" id="btn-matricular">Registrar mes</button>';
+  }
+
+  cont.innerHTML = '<div class="layout-matricula">' +
+    '<div><h3 style="color:var(--azul-oscuro);font-size:15px;margin:0 0 10px">Historial — Año ' + res.anioActivo + '</h3>' + historialHtml + '</div>' +
+    '<div class="panel-lateral">' + panelHtml + '</div>' +
+    '</div>';
+
+  var btn = document.getElementById('btn-matricular');
+  if (!btn) return;
+  btn.onclick = function () {
+    var sel = document.getElementById('sel-subprograma');
+    var msgBox = document.getElementById('matricula-msg');
+    if (!sel.value) { msgBox.innerHTML = '<div class="error-msg">Elige una opción.</div>'; return; }
+    var partes = sel.value.split('|');
+    var subprograma = partes[0], turno = partes[1];
+    if (!confirm('¿Confirmas "' + subprograma + '" para ' + res.mesActivo.label + '?\n\nUna vez enviado, este registro no podrá modificarse.')) return;
+
+    btn.disabled = true; btn.textContent = 'Registrando...';
+    sel.disabled = true;
+    apiPost('registrarAsignacion', { dni: state.usuario.dni, subprograma: subprograma, turno: turno }).then(function (r) {
+      if (r.ok) { cargarRegistro(); }
+      else {
+        btn.disabled = false; btn.textContent = 'Registrar mes'; sel.disabled = false;
+        msgBox.innerHTML = '<div class="error-msg">' + escapeHtml(r.error) + '</div>';
+        cargarRegistro();
+      }
+    }).catch(function (err) {
+      btn.disabled = false; btn.textContent = 'Registrar mes'; sel.disabled = false;
       msgBox.innerHTML = '<div class="error-msg">Error de conexión: ' + escapeHtml(err.message || err) + '</div>';
     });
   };
 }
 
 // ==================================================================
-// RESIDENTES ASIGNADOS POR ESPECIALIDAD
+// RESIDENTES POR SUBPROGRAMA
 // ==================================================================
-function renderResidentesPorEspecialidad() {
-  var rol = rolNormalizado();
-  var esDoctor = rol === 'doctor';
-  var necesitaSelector = !esDoctor && !state.usuario.residentado;
-  var residentadoActual = state.usuario.residentado || '1';
+function renderResidentesPorSubprograma() {
+  var esDoctor = rolNormalizado() === 'doctor';
+  shell(backLink() + '<h2 class="section-title">Residentes por subprograma</h2>' +
+        '<p class="section-sub">' + (esDoctor ? 'Residentes que tienes asignados a tu servicio, por mes.' : 'Vista por mes, programa, subprograma y doctor a cargo.') + '</p>' +
+        '<div id="rps-contenido" class="loading">Cargando…</div>');
 
-  shell(backLink() + '<h2 class="section-title">Residentes asignados por especialidad</h2>' +
-        '<p class="section-sub">' + (esDoctor ? 'Residentes que tienes asignados a tu servicio, en cada residentado, por mes.' : 'Vista por mes, especialidad y doctor a cargo.') + '</p>' +
-        (necesitaSelector ?
-          '<div class="filtros"><select id="sel-residentado"><option value="1">Residentado 1</option><option value="2">Residentado 2</option><option value="3">Residentado 3</option></select></div>'
-          : '') +
-        '<div id="rpe-contenido" class="loading">Cargando…</div>');
+  var params = {};
+  if (esDoctor) params.doctor = state.usuario.nombre;
 
-  function pintarBloqueMeses(res) {
-    if (!res.ok) return '<div class="error-msg">' + escapeHtml(res.error || 'Error al cargar.') + '</div>';
-    if (!res.meses.length) return '';
+  apiGet('getResidentesPorSubprograma', params).then(function (res) {
+    var cont = document.getElementById('rps-contenido');
+    if (!res.ok) { cont.innerHTML = '<div class="error-msg">' + escapeHtml(res.error || 'Error al cargar.') + '</div>'; return; }
+    if (!res.meses.length) { cont.innerHTML = '<div class="empty-state">Aún no hay residentes asignados.</div>'; return; }
+
     var html = '';
     res.meses.forEach(function (mes) {
-      html += '<div class="mes-bloque"><h3>' + escapeHtml(mes.mesLabel) + '</h3>';
-      mes.especialidades.forEach(function (esp) {
-        html += '<div class="esp-fila"><div class="esp-nombre">' + escapeHtml(esp.nombre) +
-          (esp.turno && esp.turno !== 'único' ? ' (' + escapeHtml(esp.turno) + ')' : '') + '</div>' +
-          '<div class="esp-doctor">Doctor a cargo: ' + escapeHtml(esp.doctor || '—') + '</div>' +
-          '<div class="estudiantes">' + esp.estudiantes.map(function (e) { return '<span class="chip">' + escapeHtml(e.nombre) + '</span>'; }).join('') + '</div>' +
+      html += '<div class="mes-bloque"><h3>' + escapeHtml(mes.mesKey) + '</h3>';
+      mes.bloques.forEach(function (b) {
+        html += '<div class="esp-fila"><div class="esp-nombre">' + escapeHtml(b.programa) + ' — ' + escapeHtml(b.subprograma) +
+          (b.turno && b.turno !== 'único' ? ' (' + escapeHtml(b.turno) + ')' : '') + '</div>' +
+          '<div class="esp-doctor">Doctor a cargo: ' + escapeHtml(b.doctor || '—') + '</div>' +
+          '<div class="estudiantes">' + b.estudiantes.map(function (e) { return '<span class="chip">' + escapeHtml(e.nombre) + '</span>'; }).join('') + '</div>' +
           '</div>';
       });
       html += '</div>';
     });
-    return html;
-  }
-
-  function cargarDoctor() {
-    document.getElementById('rpe-contenido').innerHTML = '<div class="loading">Cargando…</div>';
-    Promise.all(['1', '2', '3'].map(function (residentado) {
-      return apiGet('getResidentesPorEspecialidad', { residentado: residentado, doctor: state.usuario.nombre });
-    })).then(function (resultados) {
-      var cont = document.getElementById('rpe-contenido');
-      var html = '';
-      resultados.forEach(function (res, i) {
-        var bloque = pintarBloqueMeses(res);
-        if (bloque) html += '<h2 class="pagina-titulo" style="font-size:16px;margin-top:22px">Residentado ' + (i + 1) + '</h2>' + bloque;
-      });
-      cont.innerHTML = html || '<div class="empty-state">Aún no tienes residentes asignados en meses vigentes, en ningún residentado.</div>';
-    }).catch(function (err) {
-      document.getElementById('rpe-contenido').innerHTML = '<div class="error-msg">Error de conexión: ' + escapeHtml(err.message || err) + '</div>';
-    });
-  }
-
-  function cargar(residentado) {
-    document.getElementById('rpe-contenido').innerHTML = '<div class="loading">Cargando…</div>';
-    apiGet('getResidentesPorEspecialidad', { residentado: residentado }).then(function (res) {
-      var cont = document.getElementById('rpe-contenido');
-      var bloque = pintarBloqueMeses(res);
-      cont.innerHTML = bloque || (res.ok ? '<div class="empty-state">Aún no hay residentes asignados en meses vigentes.</div>' : bloque);
-    }).catch(function (err) {
-      document.getElementById('rpe-contenido').innerHTML = '<div class="error-msg">Error de conexión: ' + escapeHtml(err.message || err) + '</div>';
-    });
-  }
-
-  if (esDoctor) {
-    cargarDoctor();
-    return;
-  }
-
-  if (necesitaSelector) {
-    document.getElementById('sel-residentado').onchange = function (e) { cargar(e.target.value); };
-  }
-  cargar(residentadoActual);
+    cont.innerHTML = html;
+  }).catch(function (err) {
+    document.getElementById('rps-contenido').innerHTML = '<div class="error-msg">Error de conexión: ' + escapeHtml(err.message || err) + '</div>';
+  });
 }
 
 // ==================================================================
-// DOCUMENTOS
+// DOCUMENTOS (carpeta "Archivos Públicos")
 // ==================================================================
 function renderDocumentos() {
   var esArea = rolNormalizado() === 'area_archivos';
-  var residentadoFijo = state.usuario.residentado;
 
   var formHtml = '';
   if (esArea) {
@@ -684,16 +631,12 @@ function renderDocumentos() {
       '<div class="form-box">' +
         '<h3>Subir documento (PDF)</h3>' +
         '<div id="doc-form-msg"></div>' +
-        '<label>Residentado</label>' +
-        (residentadoFijo
-          ? '<input value="' + escapeHtml(residentadoFijo) + '" disabled />'
-          : '<select id="doc-residentado"><option value="1">1</option><option value="2">2</option><option value="3">3</option></select>') +
-        '<label>Especialidad (opcional)</label>' +
-        '<input id="doc-especialidad" placeholder="Ej. Gastroenterología" />' +
+        '<label>Programa (opcional)</label>' +
+        '<input id="doc-programa" placeholder="Ej. GAS" />' +
         '<label>Mes (opcional, formato AAAA-MM)</label>' +
         '<input id="doc-mes" placeholder="Ej. 2026-10" />' +
         '<label>Título / descripción</label>' +
-        '<input id="doc-titulo" placeholder="Ej. Rol de guardias octubre" />' +
+        '<input id="doc-titulo" placeholder="Ej. Comunicado general" />' +
         '<label>Fecha de emisión</label>' +
         '<input id="doc-fecha" type="date" />' +
         '<label>Archivo PDF</label>' +
@@ -703,20 +646,20 @@ function renderDocumentos() {
   }
 
   shell(backLink() + '<h2 class="section-title">Documentos</h2>' +
-        '<p class="section-sub">Repositorio de archivos PDF del residentado.</p>' +
+        '<p class="section-sub">Repositorio público de archivos PDF del residentado.</p>' +
         formHtml +
         '<div class="filtros">' +
-          '<input id="f-especialidad" placeholder="Filtrar por especialidad" />' +
+          '<input id="f-programa" placeholder="Filtrar por programa" />' +
           '<input id="f-mes" placeholder="Filtrar por mes (AAAA-MM)" />' +
           '<button class="secondary" id="btn-filtrar">Filtrar</button>' +
         '</div>' +
         '<div id="doc-lista" class="loading">Cargando documentos…</div>');
 
   function cargarDocs() {
-    var params = { residentado: residentadoFijo || '' };
-    var esp = document.getElementById('f-especialidad').value.trim();
+    var params = {};
+    var programa = document.getElementById('f-programa').value.trim();
     var mes = document.getElementById('f-mes').value.trim();
-    if (esp) params.especialidad = esp;
+    if (programa) params.programa = programa;
     if (mes) params.mes = mes;
 
     document.getElementById('doc-lista').innerHTML = '<div class="loading">Cargando documentos…</div>';
@@ -727,7 +670,7 @@ function renderDocumentos() {
       cont.innerHTML = '<div class="doc-list">' + res.documentos.map(function (d) {
         return '<div class="doc-card"><div>' +
           '<div class="titulo">' + escapeHtml(d.titulo) + '</div>' +
-          '<div class="meta">' + [d.especialidad, d.mes, 'Emitido: ' + d.fechaEmision].filter(Boolean).join(' · ') + '</div>' +
+          '<div class="meta">' + [d.programa, d.mes, 'Emitido: ' + d.fechaEmision].filter(Boolean).join(' · ') + '</div>' +
           '</div><a class="link-btn" href="' + d.link + '" target="_blank" rel="noopener">Ver PDF</a></div>';
       }).join('') + '</div>';
     }).catch(function (err) {
@@ -740,8 +683,7 @@ function renderDocumentos() {
 
   if (esArea) {
     document.getElementById('btn-subir-doc').onclick = function () {
-      var residentado = residentadoFijo || document.getElementById('doc-residentado').value;
-      var especialidad = document.getElementById('doc-especialidad').value.trim();
+      var programa = document.getElementById('doc-programa').value.trim();
       var mes = document.getElementById('doc-mes').value.trim();
       var titulo = document.getElementById('doc-titulo').value.trim();
       var fecha = document.getElementById('doc-fecha').value;
@@ -754,10 +696,7 @@ function renderDocumentos() {
         return;
       }
       var file = archivoInput.files[0];
-      if (file.type !== 'application/pdf') {
-        msgBox.innerHTML = '<div class="error-msg">Solo se permiten archivos PDF.</div>';
-        return;
-      }
+      if (file.type !== 'application/pdf') { msgBox.innerHTML = '<div class="error-msg">Solo se permiten archivos PDF.</div>'; return; }
 
       var reader = new FileReader();
       reader.onload = function () {
@@ -765,24 +704,12 @@ function renderDocumentos() {
         var btn = document.getElementById('btn-subir-doc');
         btn.disabled = true; btn.textContent = 'Subiendo...';
         apiPost('subirDocumento', {
-          residentado: residentado,
-          especialidad: especialidad,
-          mes: mes,
-          titulo: titulo,
-          fechaEmision: fecha,
-          dniArea: state.usuario.dni,
-          fileBase64: base64,
-          fileName: file.name,
-          mimeType: file.type
+          programa: programa, mes: mes, titulo: titulo, fechaEmision: fecha,
+          dniArea: state.usuario.dni, fileBase64: base64, fileName: file.name, mimeType: file.type
         }).then(function (res) {
           btn.disabled = false; btn.textContent = 'Subir documento';
-          if (res.ok) {
-            msgBox.innerHTML = '<div class="success-msg">Documento subido correctamente.</div>';
-            archivoInput.value = '';
-            cargarDocs();
-          } else {
-            msgBox.innerHTML = '<div class="error-msg">' + escapeHtml(res.error || 'No se pudo subir el documento.') + '</div>';
-          }
+          if (res.ok) { msgBox.innerHTML = '<div class="success-msg">Documento subido correctamente.</div>'; archivoInput.value = ''; cargarDocs(); }
+          else { msgBox.innerHTML = '<div class="error-msg">' + escapeHtml(res.error || 'No se pudo subir el documento.') + '</div>'; }
         }).catch(function (err) {
           btn.disabled = false; btn.textContent = 'Subir documento';
           msgBox.innerHTML = '<div class="error-msg">Error de conexión: ' + escapeHtml(err.message || err) + '</div>';
@@ -793,7 +720,6 @@ function renderDocumentos() {
   }
 }
 
-// ---------------- Inicio ----------------
 render();
 </script>
 </body>
