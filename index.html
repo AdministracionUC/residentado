@@ -664,10 +664,10 @@ function pintarMatricula(cont, res) {
       '<div class="progreso-texto">' + res.progreso.registrados + ' de ' + res.progreso.total + ' meses registrados</div></div>' +
       '<div id="matricula-msg"></div>' +
       '<label>Subprograma</label>' +
-      '<select id="sel-subprograma">' + res.opciones.map(function (o) {
-        var etiqueta = o.esVacaciones ? 'Vacaciones' : o.nombre + ' — ' + o.doctor + ' (' + o.ocupados + '/' + o.cupoMaximo + ' cupos)';
+      '<select id="sel-subprograma"><option value="" selected disabled>Elige una opción…</option>' + res.opciones.map(function (o) {
+        var etiqueta = o.esVacaciones ? 'Vacaciones' : o.nombre + ' — ' + o.doctor + (o.lleno ? ' (SIN CUPO — ' + o.ocupados + '/' + o.cupoMaximo + ')' : ' (' + o.ocupados + '/' + o.cupoMaximo + ' cupos)');
         var valor = o.nombre + '|' + o.turno;
-        return '<option value="' + valor + '">' + escapeHtml(etiqueta) + '</option>';
+        return '<option value="' + valor + '"' + (o.lleno ? ' disabled' : '') + '>' + escapeHtml(etiqueta) + '</option>';
       }).join('') + '</select>' +
       '<button class="primary" id="btn-matricular">Registrar mes</button>';
   }
@@ -712,12 +712,18 @@ function renderResidentesPorPrograma() {
   var esDoctor = rolNormalizado() === 'doctor';
   shell(backLink() + '<h2 class="section-title">Residentes por Programa</h2>' +
         '<p class="section-sub" id="rpp-sub">' + (esDoctor ? 'Residentes que tienes asignados a tu servicio, este mes.' : 'Elige un programa para ver quiénes están asignados este mes.') + '</p>' +
+        '<div class="filtros"><select id="sel-anio-rpp">' +
+          '<option value="">Todos los años</option>' +
+          '<option value="1">Año 1</option><option value="2">Año 2</option><option value="3">Año 3</option>' +
+        '</select></div>' +
         '<div id="rpp-contenido" class="loading">Cargando…</div>');
 
-  var params = {};
-  if (esDoctor) params.doctor = state.usuario.nombre;
+  function cargar() {
+    document.getElementById('rpp-contenido').innerHTML = '<div class="loading">Cargando…</div>';
+    var params = { anio: document.getElementById('sel-anio-rpp').value };
+    if (esDoctor) params.doctor = state.usuario.nombre;
 
-  apiGet('getResidentesPorPrograma', params).then(function (res) {
+    apiGet('getResidentesPorPrograma', params).then(function (res) {
     var cont = document.getElementById('rpp-contenido');
     if (!res.ok) { cont.innerHTML = '<div class="error-msg">' + escapeHtml(res.error || 'Error al cargar.') + '</div>'; return; }
 
@@ -730,7 +736,7 @@ function renderResidentesPorPrograma() {
         return '<div class="esp-fila"><div class="esp-nombre">' + escapeHtml(b.subprograma) +
           (b.turno && b.turno !== 'único' ? ' (' + escapeHtml(b.turno) + ')' : '') + '</div>' +
           '<div class="esp-doctor">Doctor a cargo: ' + escapeHtml(b.doctor || '—') + '</div>' +
-          '<div class="estudiantes">' + b.estudiantes.map(function (e) { return '<span class="chip">' + escapeHtml(e.nombre) + '</span>'; }).join('') + '</div>' +
+          '<div class="estudiantes">' + b.estudiantes.map(function (e) { return '<span class="chip">' + escapeHtml(e.nombre) + (e.anioResidencia ? ' · Año ' + escapeHtml(e.anioResidencia) : '') + '</span>'; }).join('') + '</div>' +
           '</div>';
       }).join('');
     }
@@ -760,9 +766,13 @@ function renderResidentesPorPrograma() {
         document.getElementById('rpp-detalle').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       };
     });
-  }).catch(function (err) {
-    document.getElementById('rpp-contenido').innerHTML = '<div class="error-msg">Error de conexión: ' + escapeHtml(err.message || err) + '</div>';
-  });
+    }).catch(function (err) {
+      document.getElementById('rpp-contenido').innerHTML = '<div class="error-msg">Error de conexión: ' + escapeHtml(err.message || err) + '</div>';
+    });
+  }
+
+  document.getElementById('sel-anio-rpp').onchange = cargar;
+  cargar();
 }
 
 // ==================================================================
