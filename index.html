@@ -456,20 +456,35 @@ function cargarHorarioResidente() {
 // RESIDENTES POR PROGRAMA (mes actual real, con flecha de mes siguiente
 // para prevenir el cambio, y filtro por año de residencia)
 // ==================================================================
+function mesConDelta(key, delta) {
+  var y = parseInt(key.substring(0, 4), 10);
+  var m = parseInt(key.substring(5, 7), 10) - 1;
+  var total = y * 12 + m + delta;
+  var ny = Math.floor(total / 12);
+  var nm = ((total % 12) + 12) % 12;
+  return ny + '-' + ('0' + (nm + 1)).slice(-2);
+}
+
 function renderResidentesPorPrograma() {
+  var mesSeleccionado = ''; // vacío = mes real actual (el servidor decide)
+
   shell(backLink() + '<h2 class="section-title">Residentes por Programa</h2>' +
         '<p class="section-sub" id="rpp-sub">Elige un programa para ver quiénes están asignados.</p>' +
         '<div class="filtros">' +
           '<select id="sel-anio-rpp"><option value="">Todos los años</option><option value="1">Año 1</option><option value="2">Año 2</option><option value="3">Año 3</option></select>' +
+          '<div class="mes-nav"><button id="btn-mes-atras" title="Mes anterior">&lsaquo;</button><span id="mes-nav-label">…</span><button id="btn-mes-adelante" title="Mes siguiente">&rsaquo;</button></div>' +
         '</div>' +
         '<div id="rpp-contenido" class="loading">Cargando…</div>');
 
   function cargar() {
     document.getElementById('rpp-contenido').innerHTML = '<div class="loading">Cargando…</div>';
-    apiGet('getResidentesPorPrograma', { anio: document.getElementById('sel-anio-rpp').value }).then(function (res) {
+    apiGet('getResidentesPorPrograma', { anio: document.getElementById('sel-anio-rpp').value, mes: mesSeleccionado }).then(function (res) {
       var cont = document.getElementById('rpp-contenido');
       if (!res.ok) { cont.innerHTML = '<div class="error-msg">' + escapeHtml(res.error || 'Error al cargar.') + '</div>'; return; }
-      document.getElementById('rpp-sub').textContent = 'Elige un programa para ver quiénes están asignados en ' + res.mesActual.label + '. El mes de vista cambia solo cuando avanza el mes real.';
+
+      mesSeleccionado = res.mesActual.key; // fija el mes que devolvió el servidor, para poder navegar desde ahí
+      document.getElementById('mes-nav-label').textContent = res.mesActual.label;
+      document.getElementById('rpp-sub').textContent = 'Elige un programa para ver quiénes están asignados en ' + res.mesActual.label + '.';
 
       function pintarOcupantes(programa) {
         if (!programa.ocupantes.length) return '<div class="empty-state">Sin residentes asignados en ' + escapeHtml(res.mesActual.label) + ' para este programa.</div>';
@@ -496,6 +511,8 @@ function renderResidentesPorPrograma() {
   }
 
   document.getElementById('sel-anio-rpp').onchange = cargar;
+  document.getElementById('btn-mes-atras').onclick = function () { mesSeleccionado = mesConDelta(mesSeleccionado || mesSeleccionado, -1); cargar(); };
+  document.getElementById('btn-mes-adelante').onclick = function () { mesSeleccionado = mesConDelta(mesSeleccionado, 1); cargar(); };
   cargar();
 }
 
