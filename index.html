@@ -187,24 +187,160 @@ var CONFIG = {
 };
 /***************************************************************************/
 
+var usuarioGuardado = null;
+
+try {
+  var usuarioTexto = localStorage.getItem('residentado_usuario');
+
+  if (usuarioTexto) {
+    usuarioGuardado = JSON.parse(usuarioTexto);
+  }
+
+} catch (error) {
+
+  console.warn(
+    'Se encontró una sesión guardada inválida. Se limpiará.',
+    error
+  );
+
+  localStorage.removeItem('residentado_usuario');
+  usuarioGuardado = null;
+}
+
 var state = {
-  usuario: JSON.parse(localStorage.getItem('residentado_usuario') || 'null'),
+  usuario: usuarioGuardado,
   vista: 'menu',
   residenteSeleccionado: null // dni del residente que el doctor está matriculando
 };
 
 var app = document.getElementById('app');
 
-function apiGet(action, params) {
-  var qs = new URLSearchParams(Object.assign({ action: action }, params || {})).toString();
-  return fetch(CONFIG.API_URL + '?' + qs).then(function (r) { return r.json(); });
+// ================================================================
+// COMUNICACIÓN CON GOOGLE APPS SCRIPT
+// ================================================================
+
+// Convierte la respuesta del servidor a JSON de forma segura.
+// Si Google devuelve HTML (por ejemplo, una página de error/redirección),
+// NO aparecerá el críptico "Unexpected token '<'"; se mostrará la
+// respuesta real para poder identificar el problema.
+function leerRespuestaJSON(response) {
+  return response.text().then(function (texto) {
+
+    var textoLimpio = (texto || '').trim();
+
+    console.log('HTTP status:', response.status);
+    console.log('Respuesta del backend:', textoLimpio);
+
+    if (!textoLimpio) {
+      throw new Error(
+        'El servidor devolvió una respuesta vacía (HTTP ' +
+        response.status + ').'
+      );
+    }
+
+    try {
+      return JSON.parse(textoLimpio);
+    } catch (error) {
+
+      var vistaPrevia = textoLimpio.substring(0, 300);
+
+      throw new Error(
+        'El servidor no devolvió JSON válido. ' +
+        'HTTP ' + response.status + '. ' +
+        'Respuesta recibida: ' + vistaPrevia
+      );
+    }
+  });
 }
+
+
+function apiGet(action, params) {
+
+  var qs = new URLSearchParams(
+    Object.assign(
+      { action: action },
+      params || {}
+    )
+  ).toString();
+
+  return fetch(
+    CONFIG.API_URL + '?' + qs,
+    {
+      method: 'GET',
+      cache: 'no-store',
+      redirect: 'follow'
+    }
+  ).then(function (response) {
+
+    return leerRespuestaJSON(response);
+
+  }).catch(function (error) {
+
+    console.error('Error apiGet:', error);
+    throw error;
+  });
+}
+
+
 function apiPost(action, payload) {
-  return fetch(CONFIG.API_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    body: JSON.stringify(Object.assign({ action: action }, payload || {}))
-  }).then(function (r) { return r.json(); });
+
+  var body = JSON.stringify(
+    Object.assign(
+      { action: action },
+      payload || {}
+    )
+  );
+
+  return fetch(
+    CONFIG.API_URL,
+    {
+      method: 'POST',
+
+      // text/plain evita que el navegador haga un preflight CORS
+      // innecesario contra Google Apps Script.
+      headers: {
+        'Content-Type': 'text/plain;charset=utf-8'
+      },
+
+      body: body,
+
+      cache: 'no-store',
+      redirect: 'follow'
+    }
+  ).then(function (response) {
+
+    return leerRespuestaJSON(response);
+
+  }).catch(function (error) {
+
+    console.error('Error apiPost:', error);
+    throw error;
+  });
+}
+
+
+// Prueba manual del backend desde la consola del navegador.
+// Ejecuta: probarConexionBackend()
+function probarConexionBackend() {
+
+  return apiGet('ping').then(function (res) {
+
+    console.log('================================');
+    console.log('BACKEND OK');
+    console.log(res);
+    console.log('================================');
+
+    return res;
+
+  }).catch(function (error) {
+
+    console.error('================================');
+    console.error('BACKEND CON ERROR');
+    console.error(error);
+    console.error('================================');
+
+    throw error;
+  });
 }
 
 function setVista(v) { state.vista = v; render(); }
@@ -301,7 +437,15 @@ function renderLogin() {
       else errBox.innerHTML = '<div class="error-msg">' + escapeHtml(res.error || 'No se pudo iniciar sesión.') + '</div>';
     }).catch(function (err) {
       btn.disabled = false; btn.textContent = 'Ingresar';
-      errBox.innerHTML = '<div class="error-msg">Error de conexión: ' + escapeHtml(err.message || err) + '</div>';
+
+      var mensaje = err && err.message
+        ? err.message
+        : String(err);
+
+      errBox.innerHTML =
+        '<div class="error-msg">' +
+        escapeHtml(mensaje) +
+        '</div>';
     });
   };
 }
