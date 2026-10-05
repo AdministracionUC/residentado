@@ -115,6 +115,8 @@
   .historial-fila .mes { font-weight: 600; color: var(--azul-oscuro); }
   .historial-fila .detalle { color: var(--gris); text-align: right; }
   .historial-fila.vacio { color: var(--gris); font-style: italic; }
+  .btn-eliminar-fila { background: none; border: none; color: var(--rojo); cursor: pointer; font-size: 13px; padding: 2px 4px; margin-left: 4px; border-radius: 4px; vertical-align: middle; }
+  .btn-eliminar-fila:hover { background: var(--rojo-fondo); }
 
   .mes-bloque { background: var(--superficie); border: 1px solid var(--borde); border-radius: var(--radio); padding: 18px 20px; margin-bottom: 14px; }
   .mes-bloque h3 { margin-top: 0; color: var(--azul-oscuro); font-size: 15.5px; }
@@ -187,160 +189,24 @@ var CONFIG = {
 };
 /***************************************************************************/
 
-var usuarioGuardado = null;
-
-try {
-  var usuarioTexto = localStorage.getItem('residentado_usuario');
-
-  if (usuarioTexto) {
-    usuarioGuardado = JSON.parse(usuarioTexto);
-  }
-
-} catch (error) {
-
-  console.warn(
-    'Se encontró una sesión guardada inválida. Se limpiará.',
-    error
-  );
-
-  localStorage.removeItem('residentado_usuario');
-  usuarioGuardado = null;
-}
-
 var state = {
-  usuario: usuarioGuardado,
+  usuario: JSON.parse(localStorage.getItem('residentado_usuario') || 'null'),
   vista: 'menu',
   residenteSeleccionado: null // dni del residente que el doctor está matriculando
 };
 
 var app = document.getElementById('app');
 
-// ================================================================
-// COMUNICACIÓN CON GOOGLE APPS SCRIPT
-// ================================================================
-
-// Convierte la respuesta del servidor a JSON de forma segura.
-// Si Google devuelve HTML (por ejemplo, una página de error/redirección),
-// NO aparecerá el críptico "Unexpected token '<'"; se mostrará la
-// respuesta real para poder identificar el problema.
-function leerRespuestaJSON(response) {
-  return response.text().then(function (texto) {
-
-    var textoLimpio = (texto || '').trim();
-
-    console.log('HTTP status:', response.status);
-    console.log('Respuesta del backend:', textoLimpio);
-
-    if (!textoLimpio) {
-      throw new Error(
-        'El servidor devolvió una respuesta vacía (HTTP ' +
-        response.status + ').'
-      );
-    }
-
-    try {
-      return JSON.parse(textoLimpio);
-    } catch (error) {
-
-      var vistaPrevia = textoLimpio.substring(0, 300);
-
-      throw new Error(
-        'El servidor no devolvió JSON válido. ' +
-        'HTTP ' + response.status + '. ' +
-        'Respuesta recibida: ' + vistaPrevia
-      );
-    }
-  });
-}
-
-
 function apiGet(action, params) {
-
-  var qs = new URLSearchParams(
-    Object.assign(
-      { action: action },
-      params || {}
-    )
-  ).toString();
-
-  return fetch(
-    CONFIG.API_URL + '?' + qs,
-    {
-      method: 'GET',
-      cache: 'no-store',
-      redirect: 'follow'
-    }
-  ).then(function (response) {
-
-    return leerRespuestaJSON(response);
-
-  }).catch(function (error) {
-
-    console.error('Error apiGet:', error);
-    throw error;
-  });
+  var qs = new URLSearchParams(Object.assign({ action: action }, params || {})).toString();
+  return fetch(CONFIG.API_URL + '?' + qs).then(function (r) { return r.json(); });
 }
-
-
 function apiPost(action, payload) {
-
-  var body = JSON.stringify(
-    Object.assign(
-      { action: action },
-      payload || {}
-    )
-  );
-
-  return fetch(
-    CONFIG.API_URL,
-    {
-      method: 'POST',
-
-      // text/plain evita que el navegador haga un preflight CORS
-      // innecesario contra Google Apps Script.
-      headers: {
-        'Content-Type': 'text/plain;charset=utf-8'
-      },
-
-      body: body,
-
-      cache: 'no-store',
-      redirect: 'follow'
-    }
-  ).then(function (response) {
-
-    return leerRespuestaJSON(response);
-
-  }).catch(function (error) {
-
-    console.error('Error apiPost:', error);
-    throw error;
-  });
-}
-
-
-// Prueba manual del backend desde la consola del navegador.
-// Ejecuta: probarConexionBackend()
-function probarConexionBackend() {
-
-  return apiGet('ping').then(function (res) {
-
-    console.log('================================');
-    console.log('BACKEND OK');
-    console.log(res);
-    console.log('================================');
-
-    return res;
-
-  }).catch(function (error) {
-
-    console.error('================================');
-    console.error('BACKEND CON ERROR');
-    console.error(error);
-    console.error('================================');
-
-    throw error;
-  });
+  return fetch(CONFIG.API_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify(Object.assign({ action: action }, payload || {}))
+  }).then(function (r) { return r.json(); });
 }
 
 function setVista(v) { state.vista = v; render(); }
@@ -437,15 +303,7 @@ function renderLogin() {
       else errBox.innerHTML = '<div class="error-msg">' + escapeHtml(res.error || 'No se pudo iniciar sesión.') + '</div>';
     }).catch(function (err) {
       btn.disabled = false; btn.textContent = 'Ingresar';
-
-      var mensaje = err && err.message
-        ? err.message
-        : String(err);
-
-      errBox.innerHTML =
-        '<div class="error-msg">' +
-        escapeHtml(mensaje) +
-        '</div>';
+      errBox.innerHTML = '<div class="error-msg">Error de conexión: ' + escapeHtml(err.message || err) + '</div>';
     });
   };
 }
@@ -457,10 +315,10 @@ function renderMenu() {
   var rol = rolNormalizado();
   var items = [];
 
-  if (rol === 'doctor') items.push({ vista: 'matricular', titulo: 'Matricular residentes', desc: 'Arma el horario de tus residentes, mes a mes.' });
+  if (rol === 'area_archivos') items.push({ vista: 'matricular', titulo: 'Matricular residentes', desc: 'Arma el horario de cualquier residente, mes a mes.' });
   if (rol === 'area_archivos') items.push({ vista: 'documentos', titulo: 'Registrar archivos', desc: 'Sube documentos PDF públicos del residentado.' });
   items.push({ vista: 'residentes-por-programa', titulo: 'Residentes por Programa', desc: 'Elige un programa y consulta quiénes están asignados, este mes.' });
-  if (rol === 'doctor' || rol === 'area_archivos') items.push({ vista: 'reporte-cupos', titulo: 'Reporte de cupos', desc: 'Cupos ocupados y libres por programa, próximos 12 meses.' });
+  if (rol === 'doctor' || rol === 'area_archivos') items.push({ vista: 'reporte-cupos', titulo: 'Ver cupos', desc: 'Cupos internos y externos, ocupados y libres, próximos 12 meses.' });
   if (rol === 'estudiante' || rol === 'doctor') items.push({ vista: 'documentos', titulo: 'Documentos', desc: 'Revisa los documentos publicados por el área correspondiente.' });
 
   var html = '<h2 class="pagina-titulo">¿Qué deseas hacer hoy?</h2><div class="menu-lista">';
@@ -477,7 +335,7 @@ function backLink(destino) {
 }
 
 // ==================================================================
-// MATRICULAR (rol doctor): elegir residente -> armar su horario
+// MATRICULAR (rol area_archivos): elegir cualquier residente -> armar su horario
 // ==================================================================
 function renderMatricular() {
   if (!state.residenteSeleccionado) { renderListaResidentes(); return; }
@@ -485,29 +343,40 @@ function renderMatricular() {
 }
 
 function renderListaResidentes() {
-  shell(backLink() + '<h2 class="section-title">Matricular residentes</h2><p class="section-sub" id="mat-sub">Cargando tu programa…</p><div id="mat-contenido" class="loading">Cargando…</div>');
+  shell(backLink() + '<h2 class="section-title">Matricular residentes</h2><p class="section-sub">Busca un residente y arma o continúa su horario.</p>' +
+        '<div class="filtros"><input id="buscar-residente" placeholder="Buscar por nombre, DNI o programa…" style="min-width:280px" /></div>' +
+        '<div id="mat-contenido" class="loading">Cargando…</div>');
 
-  apiGet('getMisResidentes', { dni: state.usuario.dni }).then(function (res) {
+  apiGet('getTodosLosResidentes', {}).then(function (res) {
     var cont = document.getElementById('mat-contenido');
     if (!res.ok) { cont.innerHTML = '<div class="error-msg">' + escapeHtml(res.error || 'Error al cargar.') + '</div>'; return; }
-    document.getElementById('mat-sub').textContent = 'Programa: ' + res.programa.nombre + ' — cupo máximo ' + res.programa.cupoMaximo + '.';
+    if (!res.residentes.length) { cont.innerHTML = '<div class="empty-state">No hay residentes registrados todavía.</div>'; return; }
 
-    if (!res.residentes.length) { cont.innerHTML = '<div class="empty-state">No tienes residentes registrados en tu programa todavía.</div>'; return; }
+    function pintar(lista) {
+      if (!lista.length) { cont.innerHTML = '<div class="empty-state">Ningún residente coincide con la búsqueda.</div>'; return; }
+      cont.innerHTML = '<div class="menu-lista">' + lista.map(function (r) {
+        var badge = r.anioResidencia === 0
+          ? '<span class="badge pend">' + escapeHtml(r.estadoTexto) + '</span>'
+          : '<span class="badge ' + (r.completo ? 'ok' : 'pend') + '">Año ' + r.anioResidencia + ' — ' + r.registrados + '/' + r.total + '</span>';
+        var desactivado = r.anioResidencia === 0 ? ' desactivado' : '';
+        return '<div class="menu-item' + desactivado + '" data-dni="' + r.dni + '" data-disponible="' + (r.anioResidencia !== 0) + '">' +
+          '<div class="texto"><h3>' + escapeHtml(r.nombre) + badge + '</h3><p>DNI ' + escapeHtml(r.dni) + ' · ' + escapeHtml(r.programaNombre) + '</p></div>' +
+          '<div class="flecha">&rsaquo;</div></div>';
+      }).join('') + '</div>';
+      document.querySelectorAll('.menu-item[data-dni]').forEach(function (el) {
+        if (el.getAttribute('data-disponible') !== 'true') return;
+        el.onclick = function () { state.residenteSeleccionado = el.getAttribute('data-dni'); renderMatricular(); };
+      });
+    }
 
-    cont.innerHTML = '<div class="menu-lista">' + res.residentes.map(function (r) {
-      var badge = r.anioResidencia === 0
-        ? '<span class="badge pend">' + escapeHtml(r.estadoTexto) + '</span>'
-        : '<span class="badge ' + (r.completo ? 'ok' : 'pend') + '">Año ' + r.anioResidencia + ' — ' + r.registrados + '/' + r.total + '</span>';
-      var desactivado = r.anioResidencia === 0 ? ' desactivado' : '';
-      return '<div class="menu-item' + desactivado + '" data-dni="' + r.dni + '" data-disponible="' + (r.anioResidencia !== 0) + '">' +
-        '<div class="texto"><h3>' + escapeHtml(r.nombre) + badge + '</h3><p>DNI ' + escapeHtml(r.dni) + '</p></div>' +
-        '<div class="flecha">&rsaquo;</div></div>';
-    }).join('') + '</div>';
-
-    document.querySelectorAll('.menu-item[data-dni]').forEach(function (el) {
-      if (el.getAttribute('data-disponible') !== 'true') return;
-      el.onclick = function () { state.residenteSeleccionado = el.getAttribute('data-dni'); renderMatricular(); };
-    });
+    pintar(res.residentes);
+    document.getElementById('buscar-residente').oninput = function (e) {
+      var q = e.target.value.trim().toLowerCase();
+      if (!q) { pintar(res.residentes); return; }
+      pintar(res.residentes.filter(function (r) {
+        return r.nombre.toLowerCase().indexOf(q) !== -1 || r.dni.indexOf(q) !== -1 || r.programaNombre.toLowerCase().indexOf(q) !== -1;
+      }));
+    };
   }).catch(function (err) {
     document.getElementById('mat-contenido').innerHTML = '<div class="error-msg">Error de conexión: ' + escapeHtml(err.message || err) + '</div>';
   });
@@ -519,7 +388,7 @@ function renderHorarioResidente() {
 }
 
 function cargarHorarioResidente() {
-  apiGet('getHorarioResidente', { dniResidente: state.residenteSeleccionado, dniDoctor: state.usuario.dni }).then(function (res) {
+  apiGet('getHorarioResidente', { dniResidente: state.residenteSeleccionado, dniRegistrador: state.usuario.dni }).then(function (res) {
     var cont = document.getElementById('hor-contenido');
     if (!res.ok) {
       cont.innerHTML = '<div class="error-msg">' + escapeHtml(res.error || 'Error al cargar.') + '</div>' +
@@ -534,7 +403,9 @@ function cargarHorarioResidente() {
       if (reg) {
         huboAlguno = true;
         var etiquetaTipo = reg.tipo === 'Externo' ? ' (externo)' : '';
-        historialHtml += '<div class="historial-fila"><span class="mes">' + escapeHtml(m.label) + '</span><span class="detalle">' + escapeHtml(reg.rotacion) + escapeHtml(etiquetaTipo) + '</span></div>';
+        historialHtml += '<div class="historial-fila"><span class="mes">' + escapeHtml(m.label) + '</span>' +
+          '<span class="detalle">' + escapeHtml(reg.rotacion) + escapeHtml(etiquetaTipo) +
+          ' <button class="btn-eliminar-fila" data-mes="' + m.key + '" title="Eliminar este registro">🗑</button></span></div>';
       }
     });
     if (!huboAlguno) historialHtml += '<div class="historial-fila vacio">Aún no hay meses registrados en este año.</div>';
@@ -568,16 +439,30 @@ function cargarHorarioResidente() {
     var btnOtro = document.getElementById('btn-otro-residente');
     if (btnOtro) btnOtro.onclick = function () { state.residenteSeleccionado = null; renderMatricular(); };
 
+    document.querySelectorAll('.btn-eliminar-fila').forEach(function (btnEl) {
+      btnEl.onclick = function () {
+        var mesKey = btnEl.getAttribute('data-mes');
+        var mesLabel = (res.meses.filter(function (m) { return m.key === mesKey; })[0] || {}).label || mesKey;
+        mostrarConfirmacion('Eliminar registro', '¿Eliminar la rotación registrada en ' + mesLabel + ' de ' + res.residente.nombre + '? Esto libera el cupo y el mes queda otra vez disponible para matricular.').then(function (ok) {
+          if (!ok) return;
+          apiPost('eliminarAsignacion', { dniRegistrador: state.usuario.dni, dniResidente: state.residenteSeleccionado, anioResidencia: res.anioResidencia, mes: mesKey }).then(function (r) {
+            if (r.ok) { mostrarToast(r.mensaje, 'exito'); cargarHorarioResidente(); }
+            else mostrarToast(r.error, 'error');
+          }).catch(function (err) { mostrarToast('Error de conexión: ' + (err.message || err), 'error'); });
+        });
+      };
+    });
+
     var btn = document.getElementById('btn-matricular');
     if (!btn) return;
     btn.onclick = function () {
       var sel = document.getElementById('sel-rotacion');
       var msgBox = document.getElementById('matricula-msg');
       if (!sel.value) { msgBox.innerHTML = '<div class="error-msg">Elige una opción.</div>'; return; }
-      mostrarConfirmacion('Confirmar rotación', '¿Confirmas "' + sel.value + '" para ' + res.residente.nombre + ' en ' + res.mesActivo.label + '?\n\nUna vez enviado, este registro no podrá modificarse.').then(function (ok) {
+      mostrarConfirmacion('Confirmar rotación', '¿Confirmas "' + sel.value + '" para ' + res.residente.nombre + ' en ' + res.mesActivo.label + '?\n\nSi te equivocas, lo puedes borrar después con el botón 🗑 del historial.').then(function (ok) {
         if (!ok) return;
         btn.disabled = true; btn.textContent = 'Registrando...'; sel.disabled = true;
-        apiPost('registrarRotacion', { dniDoctor: state.usuario.dni, dniResidente: state.residenteSeleccionado, rotacion: sel.value }).then(function (r) {
+        apiPost('registrarRotacion', { dniRegistrador: state.usuario.dni, dniResidente: state.residenteSeleccionado, rotacion: sel.value }).then(function (r) {
           if (r.ok) { mostrarToast(r.mensaje, 'exito'); cargarHorarioResidente(); }
           else {
             btn.disabled = false; btn.textContent = 'Registrar mes'; sel.disabled = false;
@@ -661,32 +546,66 @@ function renderResidentesPorPrograma() {
 }
 
 // ==================================================================
-// REPORTE DE CUPOS (próximos 12 meses, por Programa)
+// VER CUPOS — dos pestañas: Internos (por Programa) y Externos (por Institución)
 // ==================================================================
 function renderReporteCupos() {
-  shell(backLink() + '<h2 class="section-title">Reporte de cupos</h2>' +
-        '<p class="section-sub">Cupos ocupados y libres por programa, de los próximos 12 meses.</p>' +
+  shell(backLink() + '<h2 class="section-title">Ver cupos</h2>' +
+        '<p class="section-sub">Cupos ocupados y libres de los próximos 12 meses.</p>' +
+        '<div class="filtros">' +
+          '<button class="secondary" id="tab-internos">Cupos internos</button>' +
+          '<button class="secondary" id="tab-externos">Cupos externos</button>' +
+        '</div>' +
         '<div id="rep-contenido" class="loading">Cargando…</div>');
 
-  apiGet('getReporteCupos', {}).then(function (res) {
-    var cont = document.getElementById('rep-contenido');
-    if (!res.ok) { cont.innerHTML = '<div class="error-msg">' + escapeHtml(res.error || 'Error al cargar.') + '</div>'; return; }
+  function marcarTab(activa) {
+    document.getElementById('tab-internos').style.background = activa === 'internos' ? 'var(--azul)' : '';
+    document.getElementById('tab-internos').style.color = activa === 'internos' ? 'white' : '';
+    document.getElementById('tab-externos').style.background = activa === 'externos' ? 'var(--azul)' : '';
+    document.getElementById('tab-externos').style.color = activa === 'externos' ? 'white' : '';
+  }
 
-    var html = '<div class="tabla-wrap-reporte"><table class="tabla-reporte"><thead><tr><th class="prog-col">Programa</th>' +
-      res.meses.map(function (m) { return '<th>' + escapeHtml(m.label) + '</th>'; }).join('') + '</tr></thead><tbody>';
-    res.programas.forEach(function (p) {
-      html += '<tr><td class="prog-col">' + escapeHtml(p.nombre) + '</td>';
-      p.meses.forEach(function (m) {
-        var clase = m.libres === 0 ? 'lleno' : 'libre';
-        html += '<td class="celda-cupo ' + clase + '">' + m.ocupados + '/' + m.cupoMaximo + '</td>';
+  function cargarInternos() {
+    marcarTab('internos');
+    document.getElementById('rep-contenido').innerHTML = '<div class="loading">Cargando…</div>';
+    apiGet('getReporteCuposInternos', {}).then(function (res) {
+      var cont = document.getElementById('rep-contenido');
+      if (!res.ok) { cont.innerHTML = '<div class="error-msg">' + escapeHtml(res.error || 'Error al cargar.') + '</div>'; return; }
+      var html = '<div class="tabla-wrap-reporte"><table class="tabla-reporte"><thead><tr><th class="prog-col">Programa</th>' +
+        res.meses.map(function (m) { return '<th>' + escapeHtml(m.label) + '</th>'; }).join('') + '</tr></thead><tbody>';
+      res.programas.forEach(function (p) {
+        html += '<tr><td class="prog-col">' + escapeHtml(p.nombre) + '</td>';
+        p.meses.forEach(function (m) {
+          var clase = m.libres === 0 ? 'lleno' : 'libre';
+          html += '<td class="celda-cupo ' + clase + '">' + m.ocupados + '/' + m.cupoMaximo + '</td>';
+        });
+        html += '</tr>';
       });
-      html += '</tr>';
+      html += '</tbody></table></div>';
+      cont.innerHTML = html;
+    }).catch(function (err) {
+      document.getElementById('rep-contenido').innerHTML = '<div class="error-msg">Error de conexión: ' + escapeHtml(err.message || err) + '</div>';
     });
-    html += '</tbody></table></div>';
-    cont.innerHTML = html;
-  }).catch(function (err) {
-    document.getElementById('rep-contenido').innerHTML = '<div class="error-msg">Error de conexión: ' + escapeHtml(err.message || err) + '</div>';
-  });
+  }
+
+  function cargarExternos() {
+    marcarTab('externos');
+    document.getElementById('rep-contenido').innerHTML = '<div class="loading">Cargando…</div>';
+    apiGet('getReporteCuposExternos', {}).then(function (res) {
+      var cont = document.getElementById('rep-contenido');
+      if (!res.ok) { cont.innerHTML = '<div class="error-msg">' + escapeHtml(res.error || 'Error al cargar.') + '</div>'; return; }
+      if (!res.programas.length) { cont.innerHTML = '<div class="empty-state">Ningún programa tiene todavía un cupo externo configurado (columna "Cupo externo" en la hoja Programas).</div>'; return; }
+      cont.innerHTML = '<p class="panel-sub" style="margin-bottom:14px">Cuántos residentes de OTRO hospital puede recibir cada programa para hacer parte de su residentado aquí. No se lleva un conteo mes a mes porque esos residentes no forman parte de este sistema — es solo la capacidad configurada, como referencia.</p>' +
+        '<div class="historial">' + res.programas.map(function (p) {
+          return '<div class="historial-fila"><span class="mes">' + escapeHtml(p.nombre) + '</span><span class="detalle">Cupo externo: ' + p.cupoExternoMaximo + '</span></div>';
+        }).join('') + '</div>';
+    }).catch(function (err) {
+      document.getElementById('rep-contenido').innerHTML = '<div class="error-msg">Error de conexión: ' + escapeHtml(err.message || err) + '</div>';
+    });
+  }
+
+  document.getElementById('tab-internos').onclick = cargarInternos;
+  document.getElementById('tab-externos').onclick = cargarExternos;
+  cargarInternos();
 }
 
 // ==================================================================
