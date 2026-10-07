@@ -600,10 +600,19 @@ function renderReporteCupos() {
       var cont = document.getElementById('rep-contenido');
       if (!res.ok) { cont.innerHTML = '<div class="error-msg">' + escapeHtml(res.error || 'Error al cargar.') + '</div>'; return; }
       if (!res.programas.length) { cont.innerHTML = '<div class="empty-state">Ningún programa tiene todavía un cupo externo configurado (columna "Cupo externo" en la hoja Programas).</div>'; return; }
-      cont.innerHTML = '<p class="panel-sub" style="margin-bottom:14px">Cuántos residentes de OTRO hospital puede recibir cada programa para hacer parte de su residentado aquí. No se lleva un conteo mes a mes porque esos residentes no forman parte de este sistema — es solo la capacidad configurada, como referencia.</p>' +
-        '<div class="historial">' + res.programas.map(function (p) {
-          return '<div class="historial-fila"><span class="mes">' + escapeHtml(p.nombre) + '</span><span class="detalle">Cupo externo: ' + p.cupoExternoMaximo + '</span></div>';
-        }).join('') + '</div>';
+      var html = '<p class="panel-sub" style="margin-bottom:14px">Residentes de OTRO hospital (marcados como Origen = Externo en Residentes) matriculados ese mes en cada programa, contra su cupo externo configurado.</p>' +
+        '<div class="tabla-wrap-reporte"><table class="tabla-reporte"><thead><tr><th class="prog-col">Programa</th>' +
+        res.meses.map(function (m) { return '<th>' + escapeHtml(m.label) + '</th>'; }).join('') + '</tr></thead><tbody>';
+      res.programas.forEach(function (p) {
+        html += '<tr><td class="prog-col">' + escapeHtml(p.nombre) + '</td>';
+        p.meses.forEach(function (m) {
+          var clase = m.libres === 0 ? 'lleno' : 'libre';
+          html += '<td class="celda-cupo ' + clase + '">' + m.ocupados + '/' + m.cupoMaximo + '</td>';
+        });
+        html += '</tr>';
+      });
+      html += '</tbody></table></div>';
+      cont.innerHTML = html;
     }).catch(function (err) {
       document.getElementById('rep-contenido').innerHTML = '<div class="error-msg">Error de conexión: ' + escapeHtml(err.message || err) + '</div>';
     });
