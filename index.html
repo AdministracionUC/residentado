@@ -355,12 +355,13 @@ function renderListaResidentes() {
     function pintar(lista) {
       if (!lista.length) { cont.innerHTML = '<div class="empty-state">Ningún residente coincide con la búsqueda.</div>'; return; }
       cont.innerHTML = '<div class="menu-lista">' + lista.map(function (r) {
-        var badge = r.anioResidencia === 0
+        var badgeAnio = r.anioResidencia === 0
           ? '<span class="badge pend">' + escapeHtml(r.estadoTexto) + '</span>'
           : '<span class="badge ' + (r.completo ? 'ok' : 'pend') + '">Año ' + r.anioResidencia + ' — ' + r.registrados + '/' + r.total + '</span>';
+        var badgeOrigen = r.origen === 'Externo' ? '<span class="badge pend" style="background:#FBEAEA;color:var(--rojo)">Externo</span>' : '';
         var desactivado = r.anioResidencia === 0 ? ' desactivado' : '';
         return '<div class="menu-item' + desactivado + '" data-dni="' + r.dni + '" data-disponible="' + (r.anioResidencia !== 0) + '">' +
-          '<div class="texto"><h3>' + escapeHtml(r.nombre) + badge + '</h3><p>DNI ' + escapeHtml(r.dni) + ' · ' + escapeHtml(r.programaNombre) + '</p></div>' +
+          '<div class="texto"><h3>' + escapeHtml(r.nombre) + badgeAnio + badgeOrigen + '</h3><p>DNI ' + escapeHtml(r.dni) + ' · ' + escapeHtml(r.programaNombre) + '</p></div>' +
           '<div class="flecha">&rsaquo;</div></div>';
       }).join('') + '</div>';
       document.querySelectorAll('.menu-item[data-dni]').forEach(function (el) {
@@ -374,7 +375,7 @@ function renderListaResidentes() {
       var q = e.target.value.trim().toLowerCase();
       if (!q) { pintar(res.residentes); return; }
       pintar(res.residentes.filter(function (r) {
-        return r.nombre.toLowerCase().indexOf(q) !== -1 || r.dni.indexOf(q) !== -1 || r.programaNombre.toLowerCase().indexOf(q) !== -1;
+        return r.nombre.toLowerCase().indexOf(q) !== -1 || r.dni.indexOf(q) !== -1 || r.programaNombre.toLowerCase().indexOf(q) !== -1 || r.origen.toLowerCase().indexOf(q) !== -1;
       }));
     };
   }).catch(function (err) {
@@ -418,14 +419,19 @@ function cargarHorarioResidente() {
         '<button class="primary" id="btn-otro-residente" style="margin-top:16px">Añadir / continuar otro residente</button>';
     } else {
       var pct = Math.round((res.progreso.registrados / res.progreso.total) * 100);
-      panelHtml = '<h3>' + escapeHtml(res.residente.nombre) + '</h3><p class="panel-sub">Año ' + res.anioResidencia + ' — Mes actual: <strong>' + escapeHtml(res.mesActivo.label) + '</strong></p>' +
+      var esExternoRes = res.residente.origen === 'Externo';
+      panelHtml = '<h3>' + escapeHtml(res.residente.nombre) + (esExternoRes ? ' <span class="badge pend" style="background:#FBEAEA;color:var(--rojo)">Externo</span>' : '') + '</h3>' +
+        '<p class="panel-sub">Año ' + res.anioResidencia + ' — Mes actual: <strong>' + escapeHtml(res.mesActivo.label) + '</strong>' +
+        (esExternoRes ? ' — compite por el cupo EXTERNO de cada programa, no el interno.' : '') + '</p>' +
         '<div class="progreso-wrap"><div class="progreso-barra"><div class="progreso-relleno" style="width:' + pct + '%"></div></div>' +
         '<div class="progreso-texto">' + res.progreso.registrados + ' de ' + res.progreso.total + ' meses registrados</div></div>' +
         '<div id="matricula-msg"></div><label>Rotación</label>' +
         '<select id="sel-rotacion"><option value="" selected disabled>Elige una opción…</option>' + res.opciones.map(function (o) {
-          var etiqueta = o.tipo === 'Externo'
-            ? o.nombre + ' (Externo' + (o.institucionExterna ? ' — ' + o.institucionExterna : '') + ')'
-            : o.nombre + ' — ' + o.programaNombre + (o.lleno ? ' (SIN CUPO — ' + o.ocupados + '/' + o.cupoMaximo + ')' : ' (' + o.ocupados + '/' + o.cupoMaximo + ' cupos)');
+          var etiqueta;
+          if (o.tipo === 'Vacaciones') etiqueta = o.nombre;
+          else if (o.tipo === 'Externo') etiqueta = o.nombre + ' (Externo' + (o.institucionExterna ? ' — ' + o.institucionExterna : '') + ')';
+          else if (o.sinCupoExterno) etiqueta = o.nombre + ' — ' + o.programaNombre + ' (sin cupo externo configurado)';
+          else etiqueta = o.nombre + ' — ' + o.programaNombre + (o.lleno ? ' (SIN CUPO — ' + o.ocupados + '/' + o.cupoMaximo + ')' : ' (' + o.ocupados + '/' + o.cupoMaximo + ' cupos)');
           return '<option value="' + escapeHtml(o.nombre) + '"' + (o.lleno ? ' disabled' : '') + '>' + escapeHtml(etiqueta) + '</option>';
         }).join('') + '</select>' +
         '<button class="primary" id="btn-matricular">Registrar mes</button>' +
